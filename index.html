@@ -584,8 +584,8 @@ const firebaseConfig = {
               <div class="alert-chip alert-chip-yellow">🟡 ${insWarn.length} Due within 2 weeks</div>
               <div class="alert-chip alert-chip-green">🟢 ${insOk.length} Active</div>
             </div>
-            ${insAttentionHtml}
-            ${insUpcomingHtml}
+            <div id="ins-attention-slot"></div>
+            <div id="ins-upcoming-slot"></div>
             <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('insurance')">View All Insurance →</button></div>
           </div>
 
@@ -609,14 +609,20 @@ const firebaseConfig = {
               <div class="alert-chip alert-chip-yellow">🟡 ${ltoWarn.length} Due within 1 week</div>
               <div class="alert-chip alert-chip-green">🟢 ${ltoOk.length} Active</div>
             </div>
-            ${ltoAttentionHtml}
-            ${ltoUpcomingHtml}
+            <div id="lto-attention-slot"></div>
+            <div id="lto-upcoming-slot"></div>
             <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('lto')">View All LTO →</button></div>
           </div>
         </div>`;
 
+      // ── Inject dynamic sections via DOM (avoids template literal truncation) ──
+      document.getElementById('ins-attention-slot').innerHTML = insAttentionHtml;
+      document.getElementById('ins-upcoming-slot').innerHTML  = insUpcomingHtml;
+      document.getElementById('lto-attention-slot').innerHTML = ltoAttentionHtml;
+      document.getElementById('lto-upcoming-slot').innerHTML  = ltoUpcomingHtml;
+
       // Store categorised lists for the listbox toggles
-      window._dashData = { insExp, insWarn, insOk: insOk.sort((a,b)=>a._is.days-b._is.days), ltoExp, ltoWarn, ltoOk: ltoOk.sort((a,b)=>a._ls.days-b._ls.days) };
+      window._dashData = { insExp, insWarn, insOk: insOk.slice().sort((a,b)=>a._is.days-b._is.days), ltoExp, ltoWarn, ltoOk: ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days) };
     }
 
     // ══ STAT LISTBOX TOGGLE ══
