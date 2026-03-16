@@ -531,28 +531,35 @@ const firebaseConfig = {
       const ltoOk   =ltoW.filter(i=>i._ls.type==='ok');
       const ltoUpcoming=ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days).slice(0,5);
 
-      // helper: collapsible section
-      function attentionSection(expList, warnList, mode){
-        let html='';
-        if(expList.length){
-          html+=`<div class="ins-section-label" style="color:var(--red)">🔴 Expired (${expList.length})</div>`;
-          html+=expList.map(i=>mode==='ins'
-            ? alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)
-            : alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)
-          ).join('');
-        }
-        if(warnList.length){
-          html+=`<div class="ins-section-label" style="color:#e3b341;margin-top:${expList.length?'12px':'0'}">🟡 Due Soon (${warnList.length})</div>`;
-          html+=warnList.map(i=>mode==='ins'
-            ? alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)
-            : alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)
-          ).join('');
-        }
-        if(!expList.length && !warnList.length){
-          html=`<div style="font-size:12px;color:var(--green);padding:8px 0">✅ No expired or near-expiry records.</div>`;
-        }
-        return html;
+      // Build explicit HTML strings for each section outside the template literal
+      let insAttentionHtml = '';
+      if(insExp.length){
+        insAttentionHtml += `<div class="ins-section-label" style="color:var(--red)">🔴 Expired (${insExp.length})</div>`;
+        insAttentionHtml += insExp.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
       }
+      if(insWarn.length){
+        insAttentionHtml += `<div class="ins-section-label" style="color:#e3b341;margin-top:${insExp.length?'12px':'0'}">🟡 Due Soon (${insWarn.length})</div>`;
+        insAttentionHtml += insWarn.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
+      }
+      if(!insExp.length && !insWarn.length) insAttentionHtml = `<div style="font-size:12px;color:var(--green);padding:8px 0">✅ No expired or near-expiry insurance.</div>`;
+
+      let ltoAttentionHtml = '';
+      if(ltoExp.length){
+        ltoAttentionHtml += `<div class="ins-section-label" style="color:var(--red)">🔴 Expired (${ltoExp.length})</div>`;
+        ltoAttentionHtml += ltoExp.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
+      }
+      if(ltoWarn.length){
+        ltoAttentionHtml += `<div class="ins-section-label" style="color:#e3b341;margin-top:${ltoExp.length?'12px':'0'}">🟡 Due Soon (${ltoWarn.length})</div>`;
+        ltoAttentionHtml += ltoWarn.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
+      }
+      if(!ltoExp.length && !ltoWarn.length) ltoAttentionHtml = `<div style="font-size:12px;color:var(--green);padding:8px 0">✅ No expired or near-expiry LTO registrations.</div>`;
+
+      let insUpcomingHtml = insUpcoming.length
+        ? `<div class="ins-section-label" style="margin-top:12px;">📋 Upcoming Renewals</div>${insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('')}`
+        : '';
+      let ltoUpcomingHtml = ltoUpcoming.length
+        ? `<div class="ins-section-label" style="margin-top:12px;">📋 Upcoming Renewals</div>${ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('')}`
+        : '';
 
       el.innerHTML=`
         <div style="font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-bottom:16px;">📅 ${todayStr}</div>
@@ -577,11 +584,8 @@ const firebaseConfig = {
               <div class="alert-chip alert-chip-yellow">🟡 ${insWarn.length} Due within 2 weeks</div>
               <div class="alert-chip alert-chip-green">🟢 ${insOk.length} Active</div>
             </div>
-            ${attentionSection(insExp, insWarn, 'ins')}
-            ${insUpcoming.length
-              ? `<div class="ins-section-label" style="margin-top:12px;">📋 Upcoming Renewals</div>
-                 ${insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('')}`
-              : ''}
+            ${insAttentionHtml}
+            ${insUpcomingHtml}
             <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('insurance')">View All Insurance →</button></div>
           </div>
 
@@ -605,11 +609,8 @@ const firebaseConfig = {
               <div class="alert-chip alert-chip-yellow">🟡 ${ltoWarn.length} Due within 1 week</div>
               <div class="alert-chip alert-chip-green">🟢 ${ltoOk.length} Active</div>
             </div>
-            ${attentionSection(ltoExp, ltoWarn, 'lto')}
-            ${ltoUpcoming.length
-              ? `<div class="ins-section-label" style="margin-top:12px;">📋 Upcoming Renewals</div>
-                 ${ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('')}`
-              : ''}
+            ${ltoAttentionHtml}
+            ${ltoUpcomingHtml}
             <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('lto')">View All LTO →</button></div>
           </div>
         </div>`;

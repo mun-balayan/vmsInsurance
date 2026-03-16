@@ -1,5 +1,5 @@
 // Insurance Monitor Service Worker
-const CACHE = 'vms-ins-v4';  // ← bump this number every time you upload a new index.html
+const CACHE = 'vms-ins-v5';  // ← bump this number every time you upload a new index.html
 const ASSETS = [
   './',
   './index.html',
