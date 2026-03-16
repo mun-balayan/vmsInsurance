@@ -11,6 +11,10 @@
 <script>
   if('serviceWorker' in navigator){
     window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+    // Auto-reload when a new SW takes control — no manual reload needed
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
