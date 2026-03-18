@@ -529,7 +529,7 @@ const firebaseConfig = {
       const insUpcoming=insOk.slice().sort((a,b)=>a._is.days-b._is.days).slice(0,5);
 
       // ── LTO stats (7-day warning) ──
-      const ltoW=S.records.filter(i=>i.registration_date).map(i=>({...i,_ls:insStatus(i.registration_date,7)}));
+      const ltoW=S.records.filter(i=>i.registration_date||i.registration_month).map(i=>({...i,_ls:insStatus(i.registration_date,7)}));
       const ltoExp  =ltoW.filter(i=>i._ls.type==='expired').sort((a,b)=>b._ls.days-a._ls.days);
       const ltoWarn =ltoW.filter(i=>i._ls.type==='warning').sort((a,b)=>a._ls.days-b._ls.days);
       const ltoOk   =ltoW.filter(i=>i._ls.type==='ok');
@@ -685,7 +685,7 @@ const firebaseConfig = {
 
     function updateBadges(){
       document.getElementById('badge-insurance').textContent=S.records.length;
-      const ltoCount=S.records.filter(i=>i.registration_date).length;
+      const ltoCount=S.records.filter(i=>i.registration_date||i.registration_month).length;
       document.getElementById('badge-lto').textContent=ltoCount;
     }
 
@@ -739,11 +739,11 @@ const firebaseConfig = {
         </div>`;}).join('');
     }
 
-    // ══ LTO PAGE ══
     async function loadLTO(){
       document.getElementById('lto-table-area').innerHTML='<div class="loading"><div class="loading-spinner"></div><br>Loading...</div>';
       S.records=await getAll(); updateBadges();
-      const ltoList=S.records.filter(i=>i.registration_date);
+      // Include records with registration_month OR registration_date (catches null-date affected records)
+      const ltoList=S.records.filter(i=>i.registration_date||i.registration_month);
       document.getElementById('lto-count').textContent=`(${ltoList.length})`;
       renderLTOPills(); renderLTOTable(); renderLTOCards();
     }
@@ -751,7 +751,8 @@ const firebaseConfig = {
     window.setLTOFilter=m=>{S.ltoFilter=m;renderLTOPills();renderLTOTable();renderLTOCards();};
     function filteredLTO(){
       const q=S.ltoSearch.toLowerCase();
-      let list=S.records.filter(i=>i.registration_date);
+      // Show records with registration_date OR registration_month (missing date shows as fixable)
+      let list=S.records.filter(i=>i.registration_date||i.registration_month);
       if(S.ltoFilter!=='All') list=list.filter(i=>(i.registration_month||'').toUpperCase()===S.ltoFilter);
       if(q) list=list.filter(i=>[i.vehicle_name,i.plate_number,i.department,i.mv_file_no,i.registration_month].join(' ').toLowerCase().includes(q));
       return list;
@@ -765,28 +766,38 @@ const firebaseConfig = {
     function renderLTOTable(){
       const list=filteredLTO(); const el=document.getElementById('lto-table-area');
       if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🚘</div>No records found</div>';return;}
-      const st=i=>insStatus(i.registration_date,7);
+      const st=i=>i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
       el.innerHTML=`<div class="table-wrap"><table><thead><tr>
         <th>#</th><th>Vehicle</th><th class="hide-mobile">Dept</th><th>Plate</th>
         <th class="hide-mobile">Reg Month</th><th>Reg Date</th><th>Status</th>
       </tr></thead><tbody>
-        ${list.map(i=>{const s=st(i);const b=s.type==='expired'?`<span class="badge badge-red">Expired</span>`:s.type==='warning'?`<span class="badge badge-amber">Due Soon</span>`:`<span class="badge badge-green">Active</span>`;
-        return `<tr onclick="showRecordModal('${i.id}','lto')"><td class="td-muted">${i.item_no||'-'}</td><td class="td-name">${i.vehicle_name||'-'}</td>
-          <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'-'}</td>
-          <td class="td-mono">${i.plate_number||'-'}</td>
-          <td class="hide-mobile td-muted">${i.registration_month||'-'}</td>
-          <td class="td-muted">${fmtDate(i.registration_date)}</td>
-          <td>${b}</td></tr>`;}).join('')}
+        ${list.map(i=>{const s=st(i);
+          const b=s.type==='expired'?`<span class="badge badge-red">Expired</span>`:
+                  s.type==='warning'?`<span class="badge badge-amber">Due Soon</span>`:
+                  s.type==='missing'?`<span class="badge badge-gray" style="color:#f0a500;border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.1)">⚠ Fix Date</span>`:
+                  `<span class="badge badge-green">Active</span>`;
+          const dateCell=i.registration_date?fmtDate(i.registration_date):`<span style="color:#f0a500;font-size:11px">— missing —</span>`;
+          return `<tr onclick="showRecordModal('${i.id}','lto')" style="${s.type==='missing'?'background:rgba(240,165,0,.04)':''}">
+            <td class="td-muted">${i.item_no||'-'}</td><td class="td-name">${i.vehicle_name||'-'}</td>
+            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'-'}</td>
+            <td class="td-mono">${i.plate_number||'-'}</td>
+            <td class="hide-mobile td-muted">${i.registration_month||'-'}</td>
+            <td class="td-muted">${dateCell}</td>
+            <td>${b}</td></tr>`;}).join('')}
       </tbody></table></div>`;
     }
     function renderLTOCards(){
-      const st=i=>insStatus(i.registration_date,7);
+      const st=i=>i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
       document.getElementById('lto-cards').innerHTML=filteredLTO().map((i,idx)=>{
-        const s=st(i);const b=s.type==='expired'?`<span class="badge badge-red">🔴 Expired</span>`:s.type==='warning'?`<span class="badge badge-amber">🟡 Due Soon</span>`:`<span class="badge badge-green">🟢 Active</span>`;
-        return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*0.02}s" onclick="showRecordModal('${i.id}','lto')">
+        const s=st(i);
+        const b=s.type==='expired'?`<span class="badge badge-red">🔴 Expired</span>`:
+                s.type==='warning'?`<span class="badge badge-amber">🟡 Due Soon</span>`:
+                s.type==='missing'?`<span class="badge" style="color:#f0a500;border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.1)">⚠ Fix Date</span>`:
+                `<span class="badge badge-green">🟢 Active</span>`;
+        return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*0.02}s${s.type==='missing'?';border-color:rgba(240,165,0,.3)':''}" onclick="showRecordModal('${i.id}','lto')">
           <div class="flex-between gap-8"><div class="m-card-title">${i.vehicle_name||'-'}</div><span class="badge badge-amber">${i.plate_number||'-'}</span></div>
           <div class="m-card-row" style="margin-top:6px;">${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}<span>🚘 ${i.registration_month||''}</span>${b}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">Reg. Date: ${fmtDate(i.registration_date)}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">Reg. Date: ${i.registration_date?fmtDate(i.registration_date):'<span style="color:#f0a500">missing — click to fix</span>'}</div>
         </div>`;}).join('');
     }
 
