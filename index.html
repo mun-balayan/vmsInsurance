@@ -883,12 +883,17 @@ const firebaseConfig = {
 
     // LTO form — only registration fields
     function ltoForm(i={}){
+      // Normalize registration_date to YYYY-MM-DD for the date input
+      let regDate = i.registration_date||'';
+      if(regDate && regDate.includes('T')) regDate=regDate.substring(0,10);
+      if(regDate && regDate.includes(' ')) regDate=regDate.substring(0,10);
+      const iWithDate = {...i, registration_date: regDate};
       return `<div class="form-grid" id="rform">
-        ${fi('vehicle_name','Vehicle Name',i)}${fi('plate_number','Plate Number',i)}
-        ${fi('department','Department',i)}${fi('mv_file_no','MV File No',i)}
-        ${fi('registration_month','Registration Month',i)}
-        ${fi('registration_date','Registration Date',i,'date')}
-        ${fta('remarks','Remarks',i)}
+        ${fi('vehicle_name','Vehicle Name',iWithDate)}${fi('plate_number','Plate Number',iWithDate)}
+        ${fi('department','Department',iWithDate)}${fi('mv_file_no','MV File No',iWithDate)}
+        ${fi('registration_month','Registration Month',iWithDate)}
+        ${fi('registration_date','Registration Date',iWithDate,'date')}
+        ${fta('remarks','Remarks',iWithDate)}
         <div class="form-actions form-full">
           <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
           <button class="btn btn-primary" onclick="saveRecord()">💾 Save</button>
@@ -900,7 +905,16 @@ const firebaseConfig = {
       if(!isOnline){toast('You are offline. Cannot save changes.','error');return;}
       const data={};
       document.querySelectorAll('#rform [name]').forEach(el=>data[el.name]=el.value);
-      Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null;});
+      if(S.editId){
+        // When editing: only overwrite fields that have a value; empty fields keep existing data
+        const existing=S.records.find(x=>x.id===S.editId)||{};
+        Object.keys(data).forEach(k=>{
+          if(data[k]===''||data[k]===null) data[k]=existing[k]??null;
+        });
+      } else {
+        // When adding: blank fields become null
+        Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null;});
+      }
       try{
         if(S.editId){
           await updateRec(S.editId,data);
