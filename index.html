@@ -923,13 +923,13 @@ const firebaseConfig = {
         // When editing: preserve existing values for fields the user left blank,
         // EXCEPT date fields — if a date field is blank the user intentionally cleared it
         const existing=S.records.find(x=>x.id===S.editId)||{};
-        const dateFields=['registration_date','insurance_date_from','insurance_date_to'];
+        const clearableFields=['registration_date','insurance_date_from','insurance_date_to','remarks'];
         Object.keys(data).forEach(k=>{
           if(data[k]===''||data[k]===null){
-            if(dateFields.includes(k)){
-              data[k]=null; // allow intentional clearing of date fields
+            if(clearableFields.includes(k)){
+              data[k]=null;
             } else {
-              data[k]=existing[k]??null; // preserve other existing values
+              data[k]=existing[k]??null;
             }
           }
         });
