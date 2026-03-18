@@ -1,5 +1,5 @@
 // VMS Insurance Service Worker — network-first so updates show automatically
-const CACHE = 'vms-ins-v8';  // ← bump this number every time you upload a new index.html
+const CACHE = 'vms-ins-v9';  // ← bump this number every time you upload a new index.html
 const ASSETS = [
   './',
   './index.html',

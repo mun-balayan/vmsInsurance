@@ -817,7 +817,8 @@ const firebaseConfig = {
             <div class="v-hero-badges"><span class="badge badge-amber">${i.plate_number||'No Plate'}</span>${i.department?`<span class="badge badge-blue">${i.department}</span>`:''} ${sb}</div></div>
           <div class="detail-section"><div class="detail-section-title">LTO Registration Details</div>
             ${dr('Item No',i.item_no)}${dr('MV File No',i.mv_file_no,'mono')}${dr('Registration Month',i.registration_month)}
-            ${dr('Registration Date',fmtDate(i.registration_date))}</div>
+            ${dr('Registration Date',fmtDate(i.registration_date))}
+            ${dr('Remarks',i.remarks)}</div>
           <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:4px;">
             <button class="btn btn-danger" onclick="confirmDelete('${id}')">🗑 Delete</button>
             <button class="btn btn-default" onclick="openEditModal('${id}','lto')">✏️ Edit</button>
@@ -887,6 +888,7 @@ const firebaseConfig = {
         ${fi('department','Department',i)}${fi('mv_file_no','MV File No',i)}
         ${fi('registration_month','Registration Month',i)}
         ${fi('registration_date','Registration Date',i,'date')}
+        ${fta('remarks','Remarks',i)}
         <div class="form-actions form-full">
           <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
           <button class="btn btn-primary" onclick="saveRecord()">💾 Save</button>
