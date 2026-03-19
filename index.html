@@ -13,11 +13,28 @@
 <link rel="shortcut icon" href="./logo.png">
 <title>VMS Insurance Monitor — Municipality of Balayan</title>
 <script>
-  if('serviceWorker' in navigator){
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          // Poll for a new SW every 60 seconds while the tab is open
+          setInterval(() => reg.update(), 60000);
+        })
+        .catch(() => {});
+
+      // When the SW posts SW_UPDATED (new build activated), reload once.
+      // The flag prevents an infinite reload loop.
+      navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data?.type === 'SW_UPDATED') {
+          if (!sessionStorage.getItem('sw_reloaded')) {
+            sessionStorage.setItem('sw_reloaded', '1');
+            window.location.reload();
+          } else {
+            sessionStorage.removeItem('sw_reloaded');
+          }
+        }
+      });
     });
-    // Do NOT auto-reload on controllerchange — causes infinite reload loop on GitHub Pages
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
