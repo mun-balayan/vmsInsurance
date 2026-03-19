@@ -14,8 +14,10 @@
 <title>VMS Insurance Monitor — Municipality of Balayan</title>
 <script>
   if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{ window.location.reload(); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+    // Do NOT auto-reload on controllerchange — causes infinite reload loop on GitHub Pages
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -396,7 +398,13 @@ body::before {
 /* Search bar */
 .search-row {
   display:flex; align-items:center; gap:10px;
-  margin-bottom:14px; flex-wrap:wrap;
+  margin-bottom:12px; flex-wrap:wrap;
+  min-width:0;
+}
+.pills-wrap {
+  margin-bottom:14px;
+  min-width:0; width:100%;
+  overflow:hidden;
 }
 .search-wrap {
   position:relative; flex:1; min-width:200px;
@@ -416,16 +424,22 @@ body::before {
 
 /* Month pills */
 .pills-scroll {
-  display:flex; gap:6px; overflow-x:auto;
-  padding-bottom:2px; flex-wrap:nowrap;
+  display:flex; align-items:center; gap:6px;
+  overflow-x:auto; overflow-y:visible;
+  flex-wrap:nowrap;
+  padding:4px 0 8px;
+  min-width:0; width:100%;
   scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
 }
 .pills-scroll::-webkit-scrollbar { display:none; }
 .pill {
-  padding:5px 12px; border-radius:20px; font-size:11px;
+  padding:6px 14px; border-radius:20px; font-size:11px;
   font-weight:600; white-space:nowrap; cursor:pointer;
   background:var(--bg4); border:1px solid var(--border);
   color:var(--text2); transition:all .15s;
+  flex-shrink:0; /* critical — prevents pills from compressing */
+  user-select:none;
 }
 .pill:hover { color:var(--text); border-color:rgba(255,255,255,.15); }
 .pill.active {
@@ -937,7 +951,7 @@ td { padding:11px 14px; color:var(--text2); }
           </div>
         </div>
 
-        <div class="pills-scroll" id="ins-pills" style="margin-bottom:14px"></div>
+        <div class="pills-wrap"><div class="pills-scroll" id="ins-pills"></div></div>
 
         <div class="table-view" id="ins-table-area"></div>
         <div id="ins-cards"></div>
@@ -978,7 +992,7 @@ td { padding:11px 14px; color:var(--text2); }
           </div>
         </div>
 
-        <div class="pills-scroll" id="lto-pills" style="margin-bottom:14px"></div>
+        <div class="pills-wrap"><div class="pills-scroll" id="lto-pills"></div></div>
 
         <div class="table-view" id="lto-table-area"></div>
         <div id="lto-cards"></div>

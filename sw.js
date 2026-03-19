@@ -1,8 +1,8 @@
 // VMS Insurance Monitor — Service Worker
 // ⚠️ Bump CACHE version every time you push a new index.html to GitHub
-const CACHE    = 'vms-insurance-v1';
-const BASE     = '/vmsInsurance';
-const ASSETS   = [
+const CACHE  = 'vms-insurance-v2';   // ← bumped from v1 to force old SW out
+const BASE   = '/vmsInsurance';
+const ASSETS = [
   `${BASE}/`,
   `${BASE}/index.html`,
   `${BASE}/manifest.json`,
@@ -14,17 +14,20 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
       .then(c => c.addAll(ASSETS.map(a => new Request(a, { cache: 'reload' }))))
-      .catch(err => console.warn('[SW] Pre-cache failed (some assets may be missing):', err))
+      .catch(err => console.warn('[SW] Pre-cache partial failure:', err))
   );
   self.skipWaiting();
 });
 
-// ── Activate: wipe old caches, take control immediately ───────────────────
+// ── Activate: delete all old caches, take control ─────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+        keys.filter(k => k !== CACHE).map(k => {
+          console.log('[SW] Deleting old cache:', k);
+          return caches.delete(k);
+        })
       ))
       .then(() => self.clients.claim())
   );
@@ -34,7 +37,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Let Firebase, Google APIs, fonts, and CDN calls go straight to network
+  // Bypass Firebase, Google APIs, fonts, CDN — never cache these
   const bypass = [
     'firebaseapp.com',
     'googleapis.com',
@@ -45,10 +48,10 @@ self.addEventListener('fetch', e => {
   ];
   if (bypass.some(host => url.hostname.includes(host))) return;
 
-  // Only intercept requests within our GitHub Pages scope
+  // Only handle requests within our GitHub Pages scope
   if (!url.pathname.startsWith(BASE)) return;
 
-  // Network-first → cache on success → fallback to cache when offline
+  // Network-first: try network, cache on success, fall back to cache offline
   e.respondWith(
     fetch(e.request)
       .then(res => {
@@ -59,9 +62,8 @@ self.addEventListener('fetch', e => {
         return res;
       })
       .catch(() =>
-        caches.match(e.request).then(cached =>
-          cached || caches.match(`${BASE}/index.html`)
-        )
+        caches.match(e.request)
+          .then(cached => cached || caches.match(`${BASE}/index.html`))
       )
   );
 });
