@@ -403,8 +403,12 @@ body::before {
 }
 .pills-wrap {
   margin-bottom:14px;
-  min-width:0; width:100%;
-  overflow:hidden;
+  width:100%;
+}
+.pills-label {
+  font-size:9px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--text4);
+  margin-bottom:7px;
 }
 .search-wrap {
   position:relative; flex:1; min-width:200px;
@@ -424,11 +428,12 @@ body::before {
 
 /* Month pills */
 .pills-scroll {
-  display:flex; align-items:center; gap:6px;
-  overflow-x:auto; overflow-y:visible;
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
   flex-wrap:nowrap;
-  padding:4px 0 8px;
-  min-width:0; width:100%;
+  padding-bottom:4px;
+  width:100%;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
 }
@@ -951,7 +956,10 @@ td { padding:11px 14px; color:var(--text2); }
           </div>
         </div>
 
-        <div class="pills-wrap"><div class="pills-scroll" id="ins-pills"></div></div>
+        <div class="pills-wrap">
+          <div class="pills-label">Filter by month</div>
+          <div class="pills-scroll" id="ins-pills"></div>
+        </div>
 
         <div class="table-view" id="ins-table-area"></div>
         <div id="ins-cards"></div>
@@ -992,7 +1000,10 @@ td { padding:11px 14px; color:var(--text2); }
           </div>
         </div>
 
-        <div class="pills-wrap"><div class="pills-scroll" id="lto-pills"></div></div>
+        <div class="pills-wrap">
+          <div class="pills-label">Filter by month</div>
+          <div class="pills-scroll" id="lto-pills"></div>
+        </div>
 
         <div class="table-view" id="lto-table-area"></div>
         <div id="lto-cards"></div>
