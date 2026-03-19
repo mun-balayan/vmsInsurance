@@ -1,0 +1,43 @@
+{
+  "name": "VMS Insurance Monitor",
+  "short_name": "VMS Insurance",
+  "description": "Vehicle Insurance & LTO Registration Monitoring — Municipality of Balayan, Batangas",
+  "start_url": "/vmsInsurance/",
+  "scope": "/vmsInsurance/",
+  "display": "standalone",
+  "background_color": "#060D1A",
+  "theme_color": "#060D1A",
+  "orientation": "any",
+  "lang": "en-PH",
+  "icons": [
+    {
+      "src": "/vmsInsurance/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vmsInsurance/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Insurance Records",
+      "short_name": "Insurance",
+      "description": "View GSIS vehicle insurance records",
+      "url": "/vmsInsurance/?page=insurance",
+      "icons": [{ "src": "/vmsInsurance/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "LTO Registration",
+      "short_name": "LTO",
+      "description": "View LTO vehicle registration records",
+      "url": "/vmsInsurance/?page=lto",
+      "icons": [{ "src": "/vmsInsurance/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["government", "utilities", "productivity"]
+}

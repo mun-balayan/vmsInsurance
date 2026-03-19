@@ -7,8 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="VMS Insurance">
 <meta name="description" content="Vehicle Insurance & LTO Registration Monitoring — Municipality of Balayan">
-<meta name="theme-color" content="#080E1A">
-<!-- Web App Icons -->
+<meta name="theme-color" content="#060D1A">
 <link rel="icon" type="image/png" href="./logo.png">
 <link rel="apple-touch-icon" href="./logo.png">
 <link rel="shortcut icon" href="./logo.png">
@@ -23,735 +22,1023 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════ */
 :root {
-  /* ── Palette ── */
-  --bg:    #080E1A;
-  --bg2:   #0C1524;
-  --bg3:   #10192E;
-  --bg4:   #162238;
-  --bg5:   #1C2D47;
+  --bg:    #060D1A;
+  --bg2:   #0A1526;
+  --bg3:   #0F1D30;
+  --bg4:   #152438;
+  --bg5:   #1C2E48;
 
   --cyan:        #22D3EE;
   --cyan2:       #06B6D4;
-  --cyan-glow:   rgba(34,211,238,.1);
-  --cyan-border: rgba(34,211,238,.18);
+  --cyan-dim:    rgba(34,211,238,.12);
+  --cyan-border: rgba(34,211,238,.20);
+  --cyan-glow:   0 0 24px rgba(34,211,238,.15);
 
   --emerald:        #10B981;
-  --emerald2:       #059669;
-  --emerald-glow:   rgba(16,185,129,.1);
-  --emerald-border: rgba(16,185,129,.2);
+  --emerald-dim:    rgba(16,185,129,.12);
+  --emerald-border: rgba(16,185,129,.22);
 
   --amber:        #F59E0B;
-  --amber2:       #D97706;
-  --amber-glow:   rgba(245,158,11,.1);
-  --amber-border: rgba(245,158,11,.2);
+  --amber-dim:    rgba(245,158,11,.12);
+  --amber-border: rgba(245,158,11,.22);
 
   --red:        #EF4444;
-  --red2:       #DC2626;
-  --red-glow:   rgba(239,68,68,.1);
-  --red-border: rgba(239,68,68,.2);
+  --red-dim:    rgba(239,68,68,.12);
+  --red-border: rgba(239,68,68,.22);
 
-  --sky:     #38BDF8;
-  --violet:  #8B5CF6;
-  --violet-glow: rgba(139,92,246,.1);
+  --sky:    #38BDF8;
+  --violet: #8B5CF6;
+  --violet-dim: rgba(139,92,246,.12);
 
-  --text:  #F1F5F9;
-  --text2: #94A3B8;
-  --text3: #475569;
-  --text4: #2D3E55;
+  --text:  #EDF2F7;
+  --text2: #8FA5BF;
+  --text3: #4A6280;
+  --text4: #263348;
 
-  --border:  #1E3050;
-  --border2: #132033;
+  --border:  #1A2E45;
+  --border2: #0F1F32;
 
-  /* ── Layout ── */
-  --sidebar-w: 252px;
-  --topbar-h:  62px;
-  --radius:    7px;
-  --radius-lg: 12px;
-  --radius-xl: 18px;
-  --safe-bot: env(safe-area-inset-bottom,0px);
-  --safe-top: env(safe-area-inset-top,0px);
+  --sidebar-w: 248px;
+  --topbar-h:  58px;
+  --r:  8px;
+  --rl: 14px;
+  --rx: 20px;
 
-  /* ── Typography ── */
-  --font-ui:   'Sora', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --font-head: 'Sora', system-ui, sans-serif;
+  --font: 'Sora', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
 
-  /* ── Shadows ── */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,.35);
-  --shadow:    0 8px 32px rgba(0,0,0,.55);
-  --shadow-lg: 0 16px 64px rgba(0,0,0,.7);
+  --sh:    0 4px 16px rgba(0,0,0,.4);
+  --sh-lg: 0 12px 48px rgba(0,0,0,.6);
 }
 
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html { font-size:15px; -webkit-text-size-adjust:100%; }
-body { background:var(--bg); color:var(--text); font-family:var(--font-ui); line-height:1.55; overflow:hidden; height:100vh; height:100dvh; }
-button { font-family:var(--font-ui); cursor:pointer; }
-input,textarea,select { font-family:var(--font-ui); }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  line-height:1.6;
+  overflow:hidden;
+  height:100vh; height:100dvh;
+}
+button { font-family:var(--font); cursor:pointer; border:none; }
+input,textarea,select { font-family:var(--font); }
+a { color:inherit; text-decoration:none; }
 ::-webkit-scrollbar { width:4px; height:4px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 
-/* ── Ambient Background ── */
+/* Ambient grid */
 body::before {
   content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 60% 40% at 0% 0%, rgba(34,211,238,.05), transparent 60%),
-    radial-gradient(ellipse 50% 35% at 100% 100%, rgba(139,92,246,.05), transparent 60%),
-    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.012) 39px, rgba(255,255,255,.012) 40px),
-    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.012) 39px, rgba(255,255,255,.012) 40px);
+    radial-gradient(ellipse 70% 50% at 0% 0%,   rgba(34,211,238,.055), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(139,92,246,.04), transparent 55%),
+    repeating-linear-gradient(0deg,   transparent, transparent 39px, rgba(255,255,255,.011) 39px, rgba(255,255,255,.011) 40px),
+    repeating-linear-gradient(90deg,  transparent, transparent 39px, rgba(255,255,255,.011) 39px, rgba(255,255,255,.011) 40px);
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════
    LAYOUT
-═══════════════════════════════════════ */
+══════════════════════════════════════════ */
 #shell { position:relative; z-index:1; display:flex; height:100vh; height:100dvh; overflow:hidden; }
+#main  { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════════
    SIDEBAR
-═══════════════════════════════════════ */
+══════════════════════════════════════════ */
 #sidebar {
   width:var(--sidebar-w);
-  background:rgba(10,16,30,.96);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  background:rgba(8,14,26,.97);
   border-right:1px solid var(--border);
-  display:flex; flex-direction:column; flex-shrink:0; z-index:200;
+  display:flex; flex-direction:column; flex-shrink:0;
+  z-index:200; position:relative;
   transition:transform .28s cubic-bezier(.4,0,.2,1);
 }
+/* Subtle gradient line on right edge */
 #sidebar::after {
-  content:''; position:absolute; top:0; right:0; bottom:0; width:1px;
-  background:linear-gradient(180deg, var(--cyan-border), transparent 50%, var(--cyan-border));
+  content:''; position:absolute; top:0; right:-1px; bottom:0; width:1px;
+  background:linear-gradient(180deg, var(--cyan-border) 0%, transparent 40%, var(--cyan-border) 100%);
   pointer-events:none;
 }
 
 /* Brand */
-.sidebar-brand { padding:0; border-bottom:1px solid var(--border); flex-shrink:0; }
-.brand-logo { display:flex; align-items:center; gap:12px; padding:18px 16px; }
-.brand-img {
-  width:42px; height:42px; border-radius:10px;
-  object-fit:contain; border:1.5px solid var(--cyan-border);
-  background:var(--cyan-glow);
-  box-shadow:0 0 20px rgba(34,211,238,.15);
+.sb-brand {
+  padding:18px 16px 16px;
+  border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
-.brand-img-fallback {
-  width:42px; height:42px; border-radius:10px;
+.sb-brand-inner { display:flex; align-items:center; gap:11px; }
+.sb-logo {
+  width:40px; height:40px; border-radius:10px; object-fit:contain;
+  border:1.5px solid var(--cyan-border);
+  background:var(--cyan-dim);
+  box-shadow:var(--cyan-glow);
+  flex-shrink:0;
+}
+.sb-logo-fallback {
+  width:40px; height:40px; border-radius:10px;
   background:linear-gradient(135deg,var(--cyan2),var(--violet));
   display:none; align-items:center; justify-content:center;
-  font-family:var(--font-head); font-size:16px; font-weight:800; color:#fff;
-  flex-shrink:0;
+  font-weight:800; font-size:15px; color:#fff; flex-shrink:0;
 }
-.brand-name { font-family:var(--font-head); font-size:13.5px; font-weight:700; color:var(--text); letter-spacing:-.1px; line-height:1.2; }
-.brand-sub { font-size:10px; color:var(--text3); letter-spacing:.4px; margin-top:3px; }
+.sb-title { font-size:13px; font-weight:700; color:var(--text); letter-spacing:-.1px; line-height:1.2; }
+.sb-sub   { font-size:9.5px; color:var(--text3); letter-spacing:.5px; margin-top:2px; text-transform:uppercase; }
 
 /* Nav */
-.sidebar-nav { flex:1; overflow-y:auto; padding:12px 8px; }
-.nav-section-label {
-  font-size:9px; font-weight:700; color:var(--text4);
-  letter-spacing:1.8px; text-transform:uppercase;
-  padding:10px 10px 5px;
+.sb-nav { flex:1; overflow-y:auto; padding:10px 8px; }
+.sb-section-label {
+  font-size:8.5px; font-weight:700; color:var(--text4);
+  letter-spacing:2px; text-transform:uppercase;
+  padding:12px 10px 4px;
 }
 .nav-item {
   display:flex; align-items:center; gap:10px;
-  padding:9px 12px; font-size:13px; font-weight:600;
-  color:var(--text2); cursor:pointer; border:none; background:none;
-  width:100%; text-align:left; border-radius:8px;
-  transition:all .15s; position:relative; margin-bottom:2px;
+  padding:10px 12px; font-size:13px; font-weight:500;
+  color:var(--text2); background:none; width:100%;
+  text-align:left; border-radius:var(--r);
+  transition:all .15s; margin-bottom:2px; position:relative;
+  border:1px solid transparent;
 }
 .nav-item:hover { color:var(--text); background:rgba(255,255,255,.04); }
 .nav-item.active {
   color:var(--cyan);
-  background:var(--cyan-glow);
-  border:1px solid var(--cyan-border);
+  background:var(--cyan-dim);
+  border-color:var(--cyan-border);
 }
-.nav-item.active .nav-pip { background:var(--cyan); box-shadow:0 0 8px rgba(34,211,238,.7); }
-.nav-pip { width:6px; height:6px; border-radius:50%; background:transparent; flex-shrink:0; transition:all .15s; }
-.nav-icon { font-size:16px; flex-shrink:0; }
+.nav-icon { width:18px; height:18px; flex-shrink:0; opacity:.7; }
+.nav-item.active .nav-icon { opacity:1; }
+.nav-item:hover .nav-icon { opacity:.9; }
 .nav-label { flex:1; }
 .nav-badge {
-  background:rgba(255,255,255,.05); border-radius:5px;
-  padding:1px 7px; font-size:10px;
-  color:var(--text3); font-family:var(--font-mono);
-  font-weight:600; border:1px solid var(--border);
+  background:rgba(255,255,255,.05); border-radius:6px;
+  padding:1px 7px; font-size:10px; color:var(--text3);
+  font-family:var(--mono); font-weight:600;
+  border:1px solid var(--border);
 }
-.nav-item.active .nav-badge { background:var(--cyan-glow); color:var(--cyan); border-color:var(--cyan-border); }
+.nav-item.active .nav-badge { background:var(--cyan-dim); color:var(--cyan); border-color:var(--cyan-border); }
 
-.sidebar-footer {
+/* Sidebar footer */
+.sb-footer {
   border-top:1px solid var(--border);
-  padding:14px 16px; font-size:10px; color:var(--text3);
-  flex-shrink:0;
+  padding:12px 16px; flex-shrink:0;
 }
-.sidebar-footer-inner { display:flex; align-items:center; gap:8px; }
+.sb-status { display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text3); }
 .status-dot {
   width:7px; height:7px; border-radius:50%;
   background:var(--emerald); flex-shrink:0;
   box-shadow:0 0 8px rgba(16,185,129,.6);
-  animation:blink 2.5s ease-in-out infinite;
+  animation:pulse 2.4s ease-in-out infinite;
 }
-@keyframes blink { 0%,100%{opacity:1;}50%{opacity:.25;} }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.25;} }
+.sb-time { font-family:var(--mono); font-size:9px; color:var(--text3); margin-top:4px; }
 
-#sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:199; backdrop-filter:blur(6px); }
+/* Overlay */
+#sidebar-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.8); z-index:199;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
 
-/* ═══════════════════════════════════════
-   MAIN
-═══════════════════════════════════════ */
-#main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-
+/* ══════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════ */
 #topbar {
-  height:var(--topbar-h);
-  background:rgba(10,16,30,.92);
-  backdrop-filter:blur(16px);
+  height:var(--topbar-h); flex-shrink:0;
+  background:rgba(8,14,26,.95);
   border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:14px;
-  padding:0 22px; flex-shrink:0; padding-top:var(--safe-top);
-  position:relative;
+  display:flex; align-items:center; gap:12px;
+  padding:0 20px;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  position:relative; z-index:100;
 }
-#topbar::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg, var(--cyan), var(--violet), transparent 80%);
+.topbar-menu-btn {
+  width:36px; height:36px; border-radius:8px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  display:none; align-items:center; justify-content:center;
+  color:var(--text2); flex-shrink:0;
+  transition:all .15s;
 }
-#topbar-menu-btn { display:none; background:none; border:none; color:var(--text2); font-size:22px; padding:4px; line-height:1; }
-.topbar-logo {
-  width:30px; height:30px; border-radius:7px;
-  object-fit:contain; border:1px solid var(--cyan-border);
-  flex-shrink:0; display:block;
-  box-shadow:0 0 12px rgba(34,211,238,.12);
-}
-.topbar-logo-fallback { display:none; font-size:18px; }
-.topbar-title { font-family:var(--font-head); font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.2px; }
-.topbar-module {
-  font-size:10px; font-weight:600;
-  color:var(--cyan); letter-spacing:1px; text-transform:uppercase;
-  background:var(--cyan-glow); border:1px solid var(--cyan-border);
-  padding:3px 10px; border-radius:5px;
-  font-family:var(--font-mono);
-}
-.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
-.topbar-time { font-family:var(--font-mono); font-size:11px; color:var(--text3); }
+.topbar-menu-btn:hover { background:rgba(255,255,255,.09); color:var(--text); }
+.topbar-title { font-size:15px; font-weight:600; color:var(--text); flex:1; letter-spacing:-.2px; }
+.topbar-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.topbar-time { font-family:var(--mono); font-size:11px; color:var(--text3); }
 .topbar-refresh {
-  background:transparent; border:1px solid var(--border); border-radius:var(--radius);
-  color:var(--text2); padding:6px 13px; font-size:12px;
-  display:flex; align-items:center; gap:5px; transition:all .15s;
-  font-family:var(--font-ui); font-weight:600;
+  width:34px; height:34px; border-radius:7px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text2); transition:all .15s;
 }
-.topbar-refresh:hover { color:var(--cyan); border-color:var(--cyan-border); background:var(--cyan-glow); }
+.topbar-refresh:hover { background:rgba(34,211,238,.1); color:var(--cyan); border-color:var(--cyan-border); }
+.topbar-add-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 14px; border-radius:8px;
+  background:var(--cyan2); color:#fff;
+  font-size:12px; font-weight:600; letter-spacing:.1px;
+  transition:all .15s;
+  box-shadow:0 0 16px rgba(6,182,212,.2);
+}
+.topbar-add-btn:hover { background:var(--cyan); box-shadow:0 0 24px rgba(34,211,238,.3); }
+.topbar-add-btn svg { width:14px; height:14px; }
 
-/* ═══════════════════════════════════════
-   CONTENT & PAGES
-═══════════════════════════════════════ */
-#content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
-.page { display:none; padding:22px 24px; animation:pageFade .22s cubic-bezier(.4,0,.2,1); }
-.page.active { display:block; }
-@keyframes pageFade { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+/* ══════════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════════ */
+#content {
+  flex:1; overflow:hidden; position:relative;
+  display:flex; flex-direction:column;
+}
+.page {
+  display:none; flex:1; overflow-y:auto;
+  padding:24px;
+}
+.page.active { display:flex; flex-direction:column; }
+#page-dashboard { overflow:hidden; }
+#dashboard-inner {
+  flex:1; display:flex; flex-direction:column; overflow:hidden;
+  min-height:0;
+}
 
-/* ── Bottom Nav ── */
-#bottom-nav {
-  display:none; background:rgba(10,16,30,.97);
-  backdrop-filter:blur(12px);
-  border-top:1px solid var(--border);
-  flex-shrink:0; padding-bottom:var(--safe-bot);
-  box-shadow:0 -4px 20px rgba(0,0,0,.4);
-}
-.bnav-inner { display:flex; }
-.bnav-btn {
-  flex:1; background:none; border:none; color:var(--text3);
-  display:flex; flex-direction:column; align-items:center;
-  padding:10px 0 8px; font-size:9px; gap:3px; transition:color .15s;
-  font-family:var(--font-ui); font-weight:700; letter-spacing:.3px; text-transform:uppercase;
-}
-.bnav-btn.active { color:var(--cyan); }
-.bnav-icon { font-size:20px; line-height:1; }
+/* ══════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════
-   CARDS
-═══════════════════════════════════════ */
-.card {
-  background:var(--bg2); border:1px solid var(--border);
-  border-radius:var(--radius-lg); overflow:hidden; transition:border-color .2s;
+/* Date strip */
+.dash-date-strip {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:16px;
+  font-size:11px; color:var(--text3);
+  font-family:var(--mono);
+  flex-shrink:0;
 }
-.card:hover { border-color:var(--cyan-border); }
-.card-header {
-  padding:13px 18px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.card-title { font-family:var(--font-head); font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; color:var(--text); }
-.card-body { padding:16px 18px; }
+.dash-date-strip svg { width:14px; height:14px; color:var(--text3); }
 
-/* ═══════════════════════════════════════
-   DASHBOARD SPLIT
-═══════════════════════════════════════ */
-.dash-split { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px; }
-.dash-split-col {}
-.dash-col-title {
-  font-family:var(--font-head); font-size:12px; font-weight:700;
-  margin-bottom:12px; display:flex; align-items:center; gap:8px;
-  text-transform:uppercase; letter-spacing:1px;
-  padding:9px 14px; border-radius:8px;
-}
-.dash-col-title.ins { color:var(--cyan); background:var(--cyan-glow); border:1px solid var(--cyan-border); }
-.dash-col-title.lto { color:var(--sky); background:rgba(56,189,248,.07); border:1px solid rgba(56,189,248,.18); }
 
-/* Stat mini cards */
-.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
-.stat-card-sm {
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:10px; padding:13px 12px;
-  animation:fadeUp .3s ease both; cursor:pointer;
-  transition:all .2s; position:relative; overflow:hidden;
-}
-.stat-card-sm::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; border-radius:0 0 10px 10px; }
-.stat-card-sm.active-red::before   { background:var(--red); }
-.stat-card-sm.active-yellow::before { background:var(--amber); }
-.stat-card-sm.active-green::before  { background:var(--emerald); }
-.stat-card-sm:hover { border-color:var(--cyan-border); transform:translateY(-1px); }
-.stat-num-sm { font-family:var(--font-head); font-size:28px; font-weight:800; line-height:1; color:var(--text); }
-.stat-num-sm.red    { color:var(--red); }
-.stat-num-sm.yellow { color:var(--amber); }
-.stat-num-sm.green  { color:var(--emerald); }
-.stat-label-sm { font-size:9px; color:var(--text3); letter-spacing:.6px; text-transform:uppercase; margin-top:5px; font-weight:700; }
-.stat-card-sm.active-red    { border-color:var(--red-border);    background:var(--red-glow); }
-.stat-card-sm.active-yellow { border-color:var(--amber-border);  background:var(--amber-glow); }
-.stat-card-sm.active-green  { border-color:var(--emerald-border); background:var(--emerald-glow); }
 
-/* Alert chips */
-.alert-summary { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-.alert-chip {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:5px 11px; border-radius:6px; font-size:10.5px; font-weight:700;
-  font-family:var(--font-mono);
+/* Dashboard columns */
+.dash-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  flex:1;
+  min-height:0;
 }
-.alert-chip-red    { background:var(--red-glow);   color:var(--red);    border:1px solid var(--red-border);    }
-.alert-chip-yellow { background:var(--amber-glow); color:var(--amber);  border:1px solid var(--amber-border);  }
-.alert-chip-green  { background:var(--emerald-glow); color:var(--emerald); border:1px solid var(--emerald-border); }
-
-/* Section labels */
-.ins-section-label {
-  font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
-  margin-bottom:6px; margin-top:14px; padding:5px 10px;
-  border-radius:5px; display:inline-block;
+.dash-col {
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
 }
-.ins-section-label.red    { color:var(--red);    background:var(--red-glow);    border:1px solid var(--red-border); }
-.ins-section-label.yellow { color:var(--amber);  background:var(--amber-glow);  border:1px solid var(--amber-border); }
-.ins-section-label.green  { color:var(--emerald); background:var(--emerald-glow); border:1px solid var(--emerald-border); }
-.ins-section-label.default{ color:var(--text2); background:rgba(255,255,255,.04); }
-
-/* Alert bars */
-.ins-alert-bar {
+.dash-col-head {
   display:flex; align-items:center; gap:10px;
-  padding:9px 10px 9px 0;
-  margin-bottom:4px; font-size:12.5px; font-weight:600;
-  border-radius:0 8px 8px 0;
-  cursor:pointer; transition:background .1s;
-  border-left:3px solid transparent;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg4);
 }
-.ins-alert-bar:last-child { margin-bottom:0; }
-.ins-alert-bar:hover { background:rgba(255,255,255,.025); }
-.ins-alert-expired { border-left-color:var(--red); }
-.ins-alert-warning { border-left-color:var(--amber); }
-.ins-alert-ok      { border-left-color:var(--emerald); }
-.ins-alert-icon  { font-size:13px; flex-shrink:0; margin-left:10px; }
-.ins-alert-info  { flex:1; min-width:0; }
-.ins-alert-name  { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12.5px; color:var(--text); }
-.ins-alert-meta  { font-size:10.5px; color:var(--text3); margin-top:1px; }
-.ins-alert-days  { font-family:var(--font-mono); font-size:11px; white-space:nowrap; flex-shrink:0; padding:2px 8px; border-radius:5px; font-weight:700; }
-.ins-alert-expired .ins-alert-days { background:var(--red-glow);    color:var(--red); }
-.ins-alert-warning .ins-alert-days { background:var(--amber-glow);  color:var(--amber); }
-.ins-alert-ok      .ins-alert-days { background:var(--emerald-glow); color:var(--emerald); }
-
-/* Stat listbox */
-.stat-listbox { display:none; grid-column:1/-1; background:var(--bg4); border:1px solid var(--border); border-radius:10px; overflow:hidden; animation:pageFade .15s ease; }
-.stat-listbox.open { display:block; }
-.stat-listbox-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:9px 14px; border-bottom:1px solid var(--border);
-  font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2);
+.dash-col-icon {
+  width:32px; height:32px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
 }
-.stat-listbox-close { background:none; border:none; color:var(--text3); font-size:15px; cursor:pointer; padding:2px 4px; }
-.stat-listbox-close:hover { color:var(--text); }
-.stat-listbox-inner { max-height:220px; overflow-y:auto; }
-.stat-list-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:9px 14px; border-bottom:1px solid var(--border2);
-  cursor:pointer; transition:background .1s; gap:12px;
+.dash-col-icon svg { width:16px; height:16px; }
+.dash-col-icon.ins    { background:var(--cyan-dim);   color:var(--cyan); }
+.dash-col-icon.lto    { background:var(--violet-dim); color:var(--violet); }
+.dash-col-head-text   { flex:1; }
+.dash-col-title { font-size:13px; font-weight:700; color:var(--text); }
+.dash-col-sub   { font-size:10px; color:var(--text3); margin-top:1px; }
+.dash-col-btn {
+  font-size:11px; font-weight:600; padding:5px 10px;
+  border-radius:6px; background:rgba(255,255,255,.05);
+  border:1px solid var(--border); color:var(--text2);
+  transition:all .15s;
 }
-.stat-list-row:last-child { border-bottom:none; }
-.stat-list-row:hover { background:rgba(34,211,238,.03); }
-.stat-list-left { flex:1; min-width:0; }
-.stat-list-name  { font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
-.stat-list-plate { font-family:var(--font-mono); font-size:10px; color:var(--cyan); margin-top:1px; }
-.stat-list-meta  { font-size:10.5px; color:var(--text3); margin-top:1px; }
-.stat-list-days  { font-family:var(--font-mono); font-size:10.5px; white-space:nowrap; flex-shrink:0; font-weight:700; }
+.dash-col-btn:hover { color:var(--cyan); border-color:var(--cyan-border); background:var(--cyan-dim); }
+.dash-col-body { padding:14px; overflow-y:auto; flex:1; min-height:0; }
 
-/* ═══════════════════════════════════════
-   BADGES
-═══════════════════════════════════════ */
-.badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; letter-spacing:.2px; font-family:var(--font-ui); }
-.badge-amber   { background:var(--amber-glow);   color:var(--amber);   border:1px solid var(--amber-border); }
-.badge-blue    { background:rgba(56,189,248,.08); color:var(--sky);    border:1px solid rgba(56,189,248,.2); }
-.badge-green   { background:var(--emerald-glow);  color:var(--emerald); border:1px solid var(--emerald-border); }
-.badge-red     { background:var(--red-glow);      color:var(--red);    border:1px solid var(--red-border); }
-.badge-gray    { background:rgba(255,255,255,.05); color:var(--text2); border:1px solid var(--border); }
-
-/* ═══════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════ */
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:var(--radius); padding:8px 16px; font-family:var(--font-ui); font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
-.btn-primary {
-  background:linear-gradient(135deg, var(--cyan), var(--cyan2));
-  color:#030A12; box-shadow:0 2px 14px rgba(34,211,238,.25);
+/* Alert rows */
+.alert-section-label {
+  font-size:9.5px; font-weight:700; letter-spacing:1.2px;
+  text-transform:uppercase; padding:6px 0 8px;
+  display:flex; align-items:center; gap:6px;
 }
-.btn-primary:hover { box-shadow:0 4px 22px rgba(34,211,238,.4); transform:translateY(-1px); }
-.btn-default { background:rgba(255,255,255,.05); color:var(--text2); border:1px solid var(--border); }
-.btn-default:hover { color:var(--cyan); border-color:var(--cyan-border); background:var(--cyan-glow); }
-.btn-danger  { background:var(--red-glow); color:var(--red); border:1px solid var(--red-border); }
-.btn-danger:hover { background:rgba(239,68,68,.15); }
-.btn-sm { padding:5px 12px; font-size:11.5px; }
+.alert-section-label.red    { color:var(--red); }
+.alert-section-label.amber  { color:var(--amber); }
+.alert-section-label.green  { color:var(--emerald); }
+.alert-section-label.muted  { color:var(--text3); }
+.alert-section-label svg { width:12px; height:12px; }
 
-/* ═══════════════════════════════════════
-   TOOLBAR
-═══════════════════════════════════════ */
-.toolbar { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
-.search-wrap { position:relative; flex:1; min-width:200px; }
-.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px; pointer-events:none; }
-.search-input {
-  width:100%; background:var(--bg3); border:1px solid var(--border);
-  border-radius:var(--radius); padding:9px 12px 9px 36px;
-  color:var(--text); font-size:13px; outline:none;
-  transition:border-color .15s, box-shadow .15s;
+.alert-row {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 11px; border-radius:9px;
+  margin-bottom:5px; cursor:pointer;
+  border:1px solid transparent;
+  transition:all .15s;
 }
-.search-input:focus { border-color:var(--cyan-border); box-shadow:0 0 0 3px var(--cyan-glow); }
-.search-input::placeholder { color:var(--text3); }
-
-/* Pills — month filter tabs */
-.pills { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
-.pill {
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:6px; padding:4px 11px; font-size:11px; font-weight:700;
-  cursor:pointer; color:var(--text3); transition:all .15s;
-  white-space:nowrap; letter-spacing:.5px; text-transform:uppercase;
-  font-family:var(--font-mono);
+.alert-row:hover { background:rgba(255,255,255,.04); transform:translateX(2px); }
+.alert-row.red   { background:var(--red-dim);     border-color:var(--red-border); }
+.alert-row.amber { background:var(--amber-dim);   border-color:var(--amber-border); }
+.alert-row.green { background:rgba(255,255,255,.025); border-color:var(--border); }
+.alert-row.red:hover   { background:rgba(239,68,68,.18); }
+.alert-row.amber:hover { background:rgba(245,158,11,.18); }
+.alert-dot {
+  width:8px; height:8px; border-radius:50%; flex-shrink:0;
 }
-.pill:hover { border-color:var(--text2); color:var(--text); }
-.pill.active { background:var(--cyan-glow); border-color:var(--cyan-border); color:var(--cyan); }
+.alert-dot.red   { background:var(--red);     box-shadow:0 0 6px rgba(239,68,68,.6); }
+.alert-dot.amber { background:var(--amber);   box-shadow:0 0 6px rgba(245,158,11,.6); }
+.alert-dot.green { background:var(--emerald); box-shadow:0 0 6px rgba(16,185,129,.5); }
+.alert-info { flex:1; min-width:0; }
+.alert-name { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.alert-meta { font-size:10px; color:var(--text3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.alert-days {
+  font-size:10px; font-weight:700; white-space:nowrap;
+  font-family:var(--mono); flex-shrink:0;
+}
+.alert-days.red   { color:var(--red); }
+.alert-days.amber { color:var(--amber); }
+.alert-days.green { color:var(--emerald); }
 
-/* ═══════════════════════════════════════
+.dash-empty {
+  padding:24px; text-align:center;
+  font-size:11px; color:var(--text3);
+}
+.dash-empty svg { width:28px; height:28px; color:var(--emerald); margin-bottom:8px; }
+
+/* ══════════════════════════════════════════
    PAGE HEADER
-═══════════════════════════════════════ */
-.page-header { margin-bottom:20px; }
-.page-title { font-family:var(--font-head); font-size:24px; font-weight:800; display:flex; align-items:center; gap:10px; letter-spacing:-.3px; }
-.page-sub { font-size:11.5px; color:var(--text3); margin-top:4px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; }
+══════════════════════════════════════════ */
+.page-head {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:18px; flex-wrap:wrap;
+}
+.page-head-left  { flex:1; }
+.page-head-title { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.3px; }
+.page-head-sub   { font-size:11px; color:var(--text3); margin-top:3px; }
+.page-head-count {
+  font-family:var(--mono); font-size:11px; color:var(--text3);
+  background:var(--bg4); border:1px solid var(--border);
+  padding:2px 8px; border-radius:6px; margin-left:6px;
+}
 
-/* ═══════════════════════════════════════
+/* Search bar */
+.search-row {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:14px; flex-wrap:wrap;
+}
+.search-wrap {
+  position:relative; flex:1; min-width:200px;
+}
+.search-icon {
+  position:absolute; left:11px; top:50%; transform:translateY(-50%);
+  width:15px; height:15px; color:var(--text3); pointer-events:none;
+}
+.search-input {
+  width:100%; padding:9px 12px 9px 36px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:9px; color:var(--text); font-size:13px;
+  transition:all .18s; outline:none;
+}
+.search-input::placeholder { color:var(--text3); }
+.search-input:focus { border-color:var(--cyan-border); background:var(--bg4); box-shadow:0 0 0 3px rgba(34,211,238,.07); }
+
+/* Month pills */
+.pills-scroll {
+  display:flex; gap:6px; overflow-x:auto;
+  padding-bottom:2px; flex-wrap:nowrap;
+  scrollbar-width:none;
+}
+.pills-scroll::-webkit-scrollbar { display:none; }
+.pill {
+  padding:5px 12px; border-radius:20px; font-size:11px;
+  font-weight:600; white-space:nowrap; cursor:pointer;
+  background:var(--bg4); border:1px solid var(--border);
+  color:var(--text2); transition:all .15s;
+}
+.pill:hover { color:var(--text); border-color:rgba(255,255,255,.15); }
+.pill.active {
+  background:var(--cyan-dim); border-color:var(--cyan-border);
+  color:var(--cyan);
+}
+
+/* View toggle */
+.view-toggle { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.view-btn {
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  background:var(--bg4); color:var(--text2); transition:all .15s;
+}
+.view-btn.active { background:var(--cyan-dim); color:var(--cyan); }
+.view-btn:hover:not(.active) { background:rgba(255,255,255,.05); color:var(--text); }
+.view-btn svg { width:15px; height:15px; }
+
+/* ══════════════════════════════════════════
    TABLE
-═══════════════════════════════════════ */
-.table-wrap { overflow-x:auto; border-radius:var(--radius-lg); border:1px solid var(--border); }
-table { width:100%; border-collapse:collapse; font-size:12.5px; background:var(--bg2); }
-thead { background:var(--bg3); position:sticky; top:0; z-index:1; }
+══════════════════════════════════════════ */
+.table-wrap { overflow-x:auto; border-radius:var(--rl); border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:12.5px; }
 thead th {
-  padding:11px 14px; text-align:left; font-size:9px; font-weight:700;
-  color:var(--cyan); letter-spacing:1.3px; text-transform:uppercase;
-  white-space:nowrap; border-bottom:1px solid var(--cyan-border);
-  font-family:var(--font-mono);
+  background:var(--bg4);
+  padding:10px 14px; text-align:left;
+  font-size:9.5px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; color:var(--text3);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
 }
-tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
+tbody tr {
+  cursor:pointer;
+  border-bottom:1px solid var(--border2);
+  transition:background .12s;
+}
 tbody tr:last-child { border-bottom:none; }
-tbody tr:hover { background:rgba(34,211,238,.03); cursor:pointer; }
-tbody td { padding:10px 14px; vertical-align:middle; }
-.td-name { font-weight:700; color:var(--text); }
-.td-mono { font-family:var(--font-mono); font-size:11.5px; color:var(--cyan); letter-spacing:.3px; }
-.td-muted { color:var(--text2); font-size:11.5px; }
+tbody tr:hover { background:rgba(255,255,255,.03); }
+td { padding:11px 14px; color:var(--text2); }
+.td-primary { color:var(--text); font-weight:600; font-size:13px; }
+.td-mono { font-family:var(--mono); font-size:11px; color:var(--text3); }
+.td-num  { color:var(--text3); font-family:var(--mono); }
+.td-empty { text-align:center; padding:40px; }
 
-/* ═══════════════════════════════════════
-   MODAL
-═══════════════════════════════════════ */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(10px); padding:16px; }
-.modal-overlay.open { display:flex; }
+/* ══════════════════════════════════════════
+   CARDS (MOBILE VIEW)
+══════════════════════════════════════════ */
+#ins-cards, #lto-cards { display:none; }
+.m-card {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--rl); padding:14px; margin-bottom:10px;
+  cursor:pointer; transition:all .15s;
+  animation:slideIn .2s ease both;
+}
+.m-card:hover { border-color:rgba(255,255,255,.12); transform:translateY(-1px); box-shadow:var(--sh); }
+.m-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.m-card-name { font-size:13.5px; font-weight:700; color:var(--text); }
+.m-card-plate { font-family:var(--mono); font-size:10px; }
+.m-card-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+.m-card-detail { font-size:10px; color:var(--text3); display:flex; align-items:center; gap:4px; }
+.m-card-detail svg { width:11px; height:11px; }
+@keyframes slideIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+
+/* ══════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════ */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:20px;
+  font-size:10.5px; font-weight:600; white-space:nowrap;
+}
+.badge svg { width:9px; height:9px; }
+.badge-red    { background:var(--red-dim);     color:var(--red);     border:1px solid var(--red-border); }
+.badge-amber  { background:var(--amber-dim);   color:var(--amber);   border:1px solid var(--amber-border); }
+.badge-green  { background:var(--emerald-dim); color:var(--emerald); border:1px solid var(--emerald-border); }
+.badge-blue   { background:rgba(56,189,248,.1); color:var(--sky); border:1px solid rgba(56,189,248,.2); }
+.badge-violet { background:var(--violet-dim);  color:var(--violet);  border:1px solid rgba(139,92,246,.25); }
+.badge-muted  { background:rgba(255,255,255,.04); color:var(--text3); border:1px solid var(--border); }
+
+/* ══════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════ */
+.modal-backdrop {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,.75); backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+  padding:20px;
+}
+.modal-backdrop.open { display:flex; }
 .modal {
-  background:var(--bg2); border:1px solid var(--border);
-  border-top:2px solid var(--cyan);
-  border-radius:var(--radius-lg); width:100%; max-width:640px;
-  max-height:90vh; overflow-y:auto;
-  animation:modalIn .22s cubic-bezier(.34,1.2,.64,1);
-  box-shadow:0 40px 80px rgba(0,0,0,.75), 0 0 0 1px rgba(34,211,238,.05);
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:var(--rx);
+  width:100%; max-width:520px;
+  max-height:88vh; overflow:hidden;
+  display:flex; flex-direction:column;
+  box-shadow:var(--sh-lg);
+  animation:modalIn .22s cubic-bezier(.34,1.56,.64,1) both;
 }
-@keyframes modalIn { from{opacity:0;transform:scale(.95) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-.modal-header {
-  padding:18px 22px 14px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-  background:linear-gradient(135deg, rgba(34,211,238,.04), transparent);
+@keyframes modalIn { from{opacity:0;transform:scale(.94) translateY(8px);} to{opacity:1;transform:none;} }
+.modal-head {
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
 }
-.modal-title { font-family:var(--font-head); font-size:19px; font-weight:800; letter-spacing:-.2px; }
+.modal-icon {
+  width:36px; height:36px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.modal-icon svg { width:18px; height:18px; }
+.modal-icon.ins    { background:var(--cyan-dim);   color:var(--cyan); }
+.modal-icon.lto    { background:var(--violet-dim); color:var(--violet); }
+.modal-icon.form   { background:var(--emerald-dim); color:var(--emerald); }
+.modal-icon.danger { background:var(--red-dim); color:var(--red); }
+.modal-title { font-size:15px; font-weight:700; color:var(--text); flex:1; letter-spacing:-.2px; }
 .modal-close {
-  background:rgba(255,255,255,.05); border:1px solid var(--border);
-  border-radius:7px; width:30px; height:30px; color:var(--text2);
-  display:flex; align-items:center; justify-content:center; font-size:15px;
-  transition:all .15s; cursor:pointer;
+  width:32px; height:32px; border-radius:7px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text2); transition:all .15s;
 }
-.modal-close:hover { color:var(--cyan); border-color:var(--cyan-border); background:var(--cyan-glow); }
-.modal-body { padding:20px 22px; }
+.modal-close:hover { background:var(--red-dim); color:var(--red); border-color:var(--red-border); }
+.modal-close svg { width:14px; height:14px; }
+.modal-body { overflow-y:auto; padding:20px; flex:1; }
+
+/* Vehicle hero in modal */
+.v-hero {
+  background:var(--bg4);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  padding:16px; margin-bottom:16px;
+  display:flex; align-items:flex-start; gap:12px;
+}
+.v-hero-icon-wrap {
+  width:44px; height:44px; border-radius:10px;
+  background:var(--cyan-dim); border:1px solid var(--cyan-border);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.v-hero-icon-wrap svg { width:22px; height:22px; color:var(--cyan); }
+.v-hero-icon-wrap.lto { background:var(--violet-dim); border-color:rgba(139,92,246,.25); }
+.v-hero-icon-wrap.lto svg { color:var(--violet); }
+.v-hero-right { flex:1; min-width:0; }
+.v-hero-name { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.v-hero-badges { display:flex; flex-wrap:wrap; gap:5px; }
+
+/* Detail rows */
 .detail-section { margin-bottom:16px; }
 .detail-section-title {
-  font-size:9px; font-weight:700; color:var(--cyan);
-  letter-spacing:2px; text-transform:uppercase;
-  margin-bottom:8px; padding-bottom:5px;
-  border-bottom:1px solid var(--cyan-border);
+  font-size:9.5px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--text3);
+  margin-bottom:10px; padding-bottom:7px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6px;
 }
-.detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:7px 0; border-bottom:1px solid var(--border2); gap:16px; }
+.detail-section-title svg { width:12px; height:12px; }
+.detail-row {
+  display:flex; align-items:baseline; gap:12px;
+  padding:6px 0; border-bottom:1px solid var(--border2);
+}
 .detail-row:last-child { border-bottom:none; }
-.detail-label { font-size:11.5px; color:var(--text3); flex-shrink:0; font-weight:600; }
-.detail-value { font-size:12.5px; text-align:right; word-break:break-all; color:var(--text); font-weight:500; }
-.detail-mono { font-family:var(--font-mono); color:var(--cyan); }
-.v-hero { text-align:center; padding:16px 0 22px; }
-.v-hero-icon { font-size:52px; margin-bottom:10px; filter:drop-shadow(0 0 12px rgba(34,211,238,.3)); }
-.v-hero-name { font-family:var(--font-head); font-size:21px; font-weight:800; }
-.v-hero-badges { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+.detail-label { font-size:11px; color:var(--text3); font-weight:500; min-width:130px; flex-shrink:0; }
+.detail-value { font-size:12.5px; color:var(--text); font-weight:500; flex:1; }
+.detail-mono  { font-family:var(--mono); font-size:11px; }
 
-/* ── FORM ── */
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.form-full { grid-column:1/-1; }
-.form-group { display:flex; flex-direction:column; gap:5px; }
-.form-label { font-size:9.5px; color:var(--text3); font-weight:700; letter-spacing:.8px; text-transform:uppercase; }
-.form-input,.form-select,.form-textarea {
-  background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius);
-  padding:9px 12px; color:var(--text); font-size:13px; outline:none;
-  transition:border-color .15s, box-shadow .15s; width:100%;
+/* ══════════════════════════════════════════
+   FORM
+══════════════════════════════════════════ */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-full  { grid-column:1/-1; }
+.form-group label {
+  display:block; font-size:10.5px; font-weight:600;
+  color:var(--text3); margin-bottom:5px; letter-spacing:.3px;
 }
-.form-input:focus,.form-select:focus,.form-textarea:focus {
-  border-color:var(--cyan-border); box-shadow:0 0 0 3px var(--cyan-glow); background:var(--bg4);
+.form-input, .form-textarea, .form-select {
+  width:100%; padding:9px 12px;
+  background:var(--bg4); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:13px;
+  outline:none; transition:all .18s;
 }
-input[type="date"].form-input { color-scheme:dark; }
-input[type="date"].form-input::-webkit-calendar-picker-indicator { filter:invert(.7) sepia(1) saturate(3) hue-rotate(160deg); cursor:pointer; }
-.form-textarea { resize:vertical; min-height:80px; }
-.form-select {
-  appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2322D3EE'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 12px center; padding-right:32px;
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color:var(--cyan-border);
+  box-shadow:0 0 0 3px rgba(34,211,238,.07);
+  background:var(--bg3);
 }
-.form-actions { display:flex; gap:10px; justify-content:flex-end; padding-top:16px; border-top:1px solid var(--border); margin-top:20px; }
+.form-textarea { resize:vertical; min-height:64px; font-size:12px; }
+.form-date-row { display:grid; grid-template-columns:1fr 24px 1fr; gap:8px; align-items:center; }
+.form-date-arrow { text-align:center; color:var(--text3); font-size:16px; }
 
-/* ── UTILITY ── */
-.loading { text-align:center; padding:60px 20px; color:var(--text3); font-size:13px; }
-.loading-spinner {
-  display:inline-block; width:28px; height:28px;
-  border:2.5px solid var(--bg3); border-top-color:var(--cyan);
-  border-radius:50%; animation:spin 1s linear infinite; margin-bottom:12px;
+/* Form actions */
+.form-actions {
+  display:flex; justify-content:flex-end; gap:8px;
+  padding-top:14px; margin-top:6px;
+  border-top:1px solid var(--border);
+  grid-column:1/-1;
 }
-@keyframes spin { to{transform:rotate(360deg)} }
-.empty { text-align:center; padding:60px 20px; color:var(--text3); }
-.empty-icon { font-size:44px; margin-bottom:12px; opacity:.3; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.flex-between { display:flex; align-items:center; justify-content:space-between; }
-.gap-8 { gap:8px; }
 
-/* ── Toast ── */
-.toast {
-  position:fixed; bottom:26px; right:26px;
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:var(--radius-lg); padding:13px 20px;
-  font-size:13px; z-index:999; opacity:0;
-  transform:translateY(10px) scale(.97); pointer-events:none;
-  transition:all .25s cubic-bezier(.34,1.2,.64,1);
-  box-shadow:var(--shadow); max-width:320px; font-weight:600;
+/* ══════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════ */
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 16px; border-radius:8px;
+  font-size:12.5px; font-weight:600;
+  transition:all .15s; white-space:nowrap;
 }
-.toast.show { opacity:1; transform:translateY(0) scale(1); }
-.toast.success { border-color:var(--emerald-border); color:var(--emerald); }
-.toast.error   { border-color:var(--red-border);     color:var(--red); }
+.btn svg { width:14px; height:14px; }
+.btn-primary {
+  background:var(--cyan2); color:#fff;
+  box-shadow:0 0 12px rgba(6,182,212,.18);
+}
+.btn-primary:hover { background:var(--cyan); box-shadow:0 0 20px rgba(34,211,238,.25); }
+.btn-default {
+  background:rgba(255,255,255,.05); border:1px solid var(--border);
+  color:var(--text2);
+}
+.btn-default:hover { background:rgba(255,255,255,.09); color:var(--text); }
+.btn-danger {
+  background:var(--red-dim); border:1px solid var(--red-border);
+  color:var(--red);
+}
+.btn-danger:hover { background:rgba(239,68,68,.22); }
+.btn-sm { padding:6px 12px; font-size:11.5px; }
 
-/* ── Offline Banner ── */
+/* ══════════════════════════════════════════
+   LOADING & EMPTY
+══════════════════════════════════════════ */
+.loading-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex:1; min-height:200px; color:var(--text3); gap:12px;
+}
+.spinner {
+  width:28px; height:28px;
+  border:2.5px solid var(--border);
+  border-top-color:var(--cyan);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg);} }
+.empty-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 24px; color:var(--text3); gap:8px;
+}
+.empty-state svg { width:36px; height:36px; color:var(--text4); margin-bottom:4px; }
+.empty-state p { font-size:13px; color:var(--text3); }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--bg4); border:1px solid var(--border);
+  color:var(--text); padding:10px 18px; border-radius:10px;
+  font-size:12.5px; font-weight:600;
+  box-shadow:var(--sh-lg); z-index:999;
+  opacity:0; transition:all .25s; white-space:nowrap;
+  pointer-events:none;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.success { border-color:var(--emerald-border); color:var(--emerald); }
+#toast.error   { border-color:var(--red-border);     color:var(--red); }
+
+/* ══════════════════════════════════════════
+   STAT LISTBOX (DASHBOARD CLICK)
+══════════════════════════════════════════ */
+.stat-listbox {
+  display:none; grid-column:1/-1;
+  background:var(--bg4); border:1px solid var(--border);
+  border-radius:var(--rl); overflow:hidden;
+  margin-top:8px;
+}
+.stat-listbox.open { display:block; }
+.stat-listbox-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px; border-bottom:1px solid var(--border);
+  font-size:11px; font-weight:700; color:var(--text2);
+}
+.stat-listbox-close {
+  width:24px; height:24px; border-radius:6px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text3); font-size:12px; transition:all .12s;
+}
+.stat-listbox-close:hover { color:var(--red); border-color:var(--red-border); background:var(--red-dim); }
+.stat-listbox-inner { max-height:240px; overflow-y:auto; }
+.stat-list-row {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 14px; border-bottom:1px solid var(--border2);
+  cursor:pointer; transition:background .12s;
+}
+.stat-list-row:last-child { border-bottom:none; }
+.stat-list-row:hover { background:rgba(255,255,255,.03); }
+.stat-list-left { flex:1; min-width:0; }
+.stat-list-name { font-size:12px; font-weight:600; color:var(--text); }
+.stat-list-name span { font-family:var(--mono); font-size:10px; color:var(--amber); }
+.stat-list-meta { font-size:10px; color:var(--text3); margin-top:1px; }
+.stat-list-days { font-size:10px; font-weight:700; font-family:var(--mono); white-space:nowrap; flex-shrink:0; }
+
+/* Dashboard stat mini cards */
+.dash-stats-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  margin-bottom:14px; position:relative;
+}
+.dash-stat-card {
+  background:var(--bg4); border:1px solid var(--border);
+  border-radius:9px; padding:10px 12px; cursor:pointer;
+  transition:all .15s; text-align:center;
+}
+.dash-stat-card:hover { transform:translateY(-1px); }
+.dash-stat-card.active-red   { border-color:var(--red-border);     background:var(--red-dim); }
+.dash-stat-card.active-amber { border-color:var(--amber-border);   background:var(--amber-dim); }
+.dash-stat-card.active-green { border-color:var(--emerald-border); background:var(--emerald-dim); }
+.dash-stat-num { font-size:20px; font-weight:700; font-family:var(--mono); line-height:1; }
+.dash-stat-num.red   { color:var(--red); }
+.dash-stat-num.amber { color:var(--amber); }
+.dash-stat-num.green { color:var(--emerald); }
+.dash-stat-lbl { font-size:9.5px; color:var(--text3); margin-top:2px; }
+
+/* ══════════════════════════════════════════
+   ONLINE/OFFLINE BANNER
+══════════════════════════════════════════ */
 #offline-banner {
-  display:none; background:rgba(245,158,11,.1); color:var(--amber);
-  text-align:center; padding:7px 16px; font-size:12px; font-weight:700;
-  flex-shrink:0; border-bottom:1px solid var(--amber-border);
-  letter-spacing:.3px;
+  display:none; align-items:center; gap:8px;
+  padding:8px 16px; background:var(--amber-dim);
+  border-bottom:1px solid var(--amber-border);
+  font-size:11.5px; color:var(--amber); font-weight:600;
+  flex-shrink:0;
 }
-#offline-banner.show { display:block; }
+#offline-banner svg { width:14px; height:14px; }
+#offline-banner.show { display:flex; }
 
-/* ── Mobile Cards ── */
-.mobile-cards { display:none; }
-.m-card {
-  background:var(--bg2); border:1px solid var(--border);
-  border-left:3px solid var(--border);
-  border-radius:var(--radius-lg); padding:14px 15px; margin-bottom:8px;
-  cursor:pointer; transition:all .15s; animation:fadeUp .2s ease both;
-  box-shadow:var(--shadow-sm);
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1200px) {
 }
-.m-card:hover { border-left-color:var(--cyan); background:var(--bg3); transform:translateY(-1px); }
-.m-card:active { background:var(--bg4); transform:none; }
-.m-card-title { font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:5px; color:var(--text); }
-.m-card-row { display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--text3); gap:8px; flex-wrap:wrap; }
-
-/* ── FAB ── */
-.fab {
-  display:none; position:fixed;
-  right:18px; bottom:calc(60px + 14px + var(--safe-bot));
-  width:52px; height:52px; border-radius:14px;
-  background:linear-gradient(135deg, var(--cyan), var(--cyan2));
-  border:none; color:#030A12; font-size:26px; font-weight:700;
-  box-shadow:0 4px 20px rgba(34,211,238,.4);
-  align-items:center; justify-content:center; z-index:50; transition:transform .15s, box-shadow .15s;
-}
-.fab:active { transform:scale(.9); box-shadow:0 2px 10px rgba(34,211,238,.3); }
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px) { .dash-split{grid-template-columns:1fr;} }
-@media(max-width:768px) {
-  :root { --topbar-h:52px; }
-  #sidebar { position:fixed; top:0; left:0; height:100%; transform:translateX(-100%); }
-  #sidebar.open { transform:translateX(0); box-shadow:var(--shadow-lg); }
+@media (max-width: 900px) {
+  :root { --sidebar-w:280px; }
+  #sidebar {
+    position:fixed; left:0; top:0; bottom:0;
+    transform:translateX(-100%); z-index:300;
+  }
+  #sidebar.open { transform:none; }
   #sidebar-overlay.open { display:block; }
-  #topbar-menu-btn { display:flex; }
-  #topbar-add-btn { display:none !important; }
-  #bottom-nav { display:block; }
-  .page { padding:12px 12px calc(10px + var(--safe-bot)); }
-  .stats-row { grid-template-columns:repeat(3,1fr); gap:6px; }
-  .stat-num-sm { font-size:22px; }
-  .form-grid { grid-template-columns:1fr; }
-  .form-actions { flex-direction:column-reverse; }
-  .form-actions .btn { width:100%; justify-content:center; }
-  .topbar-time { display:none; }
-  .topbar-refresh { display:none; }
-  .topbar-module { display:none; }
-  .modal-overlay { align-items:flex-end; padding:0; }
-  .modal { max-width:100%; border-radius:18px 18px 0 0; max-height:90dvh; }
-  .table-wrap { display:none; }
-  .mobile-cards { display:block; }
-  .hide-mobile { display:none !important; }
-  .page-title { font-size:20px; }
-  .page-header { margin-bottom:14px; }
-  .fab { display:flex; }
-  .card-body { padding:12px; }
-  .pills { gap:4px; margin-bottom:10px; }
-  .pill { padding:3px 8px; font-size:10px; }
-  .bnav-btn { font-size:8.5px; padding:8px 0 6px; }
+  .topbar-menu-btn { display:flex; }
+  .dash-grid { grid-template-columns:1fr; flex:none; }
+  .dash-col { min-height:360px; }
 }
-@media(max-width:390px) {
-  :root { --topbar-h:46px; }
-  .stats-row { gap:5px; }
-  .stat-num-sm { font-size:18px; }
-  .badge { font-size:10px; padding:1px 6px; }
-  .modal-body { padding:14px 16px; }
-  .form-input,.form-select,.form-textarea { font-size:12.5px; }
-  .fab { border-radius:12px; width:48px; height:48px; right:14px; }
+@media (max-width: 640px) {
+  .page { padding:14px; }
+  .hide-mobile { display:none !important; }
+  #ins-cards,#lto-cards { display:block; }
+  .table-view { display:none; }
+  .form-grid { grid-template-columns:1fr; }
+  .search-row { flex-direction:column; }
+  .search-wrap { width:100%; }
 }
 </style>
-
 </head>
 <body>
 
 <div id="shell">
+
+  <!-- ════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════ -->
   <aside id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-logo">
-        <img class="brand-img" src="./logo.png" alt="Logo"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="brand-img-fallback">VI</div>
-        <div class="brand-text">
-          <div class="brand-name">Insurance Monitoring</div>
-          <div class="brand-sub">Municipality of Balayan</div>
+
+    <div class="sb-brand">
+      <div class="sb-brand-inner">
+        <img class="sb-logo" src="./logo.png" alt="Logo"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="sb-logo-fallback">MB</div>
+        <div>
+          <div class="sb-title">VMS Insurance</div>
+          <div class="sb-sub">Municipality of Balayan</div>
         </div>
       </div>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Overview</div>
+
+    <nav class="sb-nav">
+      <div class="sb-section-label">Monitor</div>
+
       <button class="nav-item active" id="snav-dashboard" onclick="switchPage('dashboard')">
-        <span class="nav-pip"></span><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span class="nav-label">Dashboard</span>
       </button>
-      <div class="nav-section-label">Records</div>
+
       <button class="nav-item" id="snav-insurance" onclick="switchPage('insurance')">
-        <span class="nav-pip"></span><span class="nav-icon">🛡</span><span class="nav-label">Insurance</span><span class="nav-badge" id="badge-insurance">—</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span class="nav-label">Insurance Records</span>
+        <span class="nav-badge" id="badge-insurance">—</span>
       </button>
+
       <button class="nav-item" id="snav-lto" onclick="switchPage('lto')">
-        <span class="nav-pip"></span><span class="nav-icon">🚘</span><span class="nav-label">LTO Registration</span><span class="nav-badge" id="badge-lto">—</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+        <span class="nav-label">LTO Registration</span>
+        <span class="nav-badge" id="badge-lto">—</span>
       </button>
+
     </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-inner">
-        <div class="status-dot"></div>
-        <div>
-          <span id="sidebar-time" style="font-family:var(--font-mono);font-size:10.5px;display:block;color:var(--text2)"></span>
-          Balayan, Batangas
-        </div>
+
+    <div class="sb-footer">
+      <div class="sb-status">
+        <div class="status-dot" id="sb-status-dot"></div>
+        <span id="sb-status-text">Connected</span>
       </div>
+      <div class="sb-time" id="sidebar-time"></div>
     </div>
   </aside>
+
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
+  <!-- ════════════════════════════════
+       MAIN
+  ════════════════════════════════ -->
   <div id="main">
-    <div id="offline-banner">📵 Offline — view only. Changes cannot be saved until you reconnect.</div>
-    <div id="topbar">
-      <button id="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
-      <img class="topbar-logo" src="./logo.png" alt=""
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <span class="topbar-logo-fallback">🛡</span>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <span class="topbar-module">Insurance Monitoring</span>
+
+    <!-- Topbar -->
+    <header id="topbar">
+      <button class="topbar-menu-btn" onclick="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+
       <div class="topbar-right">
-        <div class="topbar-time" id="topbar-time"></div>
-        <button class="topbar-refresh" onclick="refreshCurrent()">↻ Refresh</button>
-        <button class="btn btn-primary btn-sm" id="topbar-add-btn" onclick="openAddModal()">＋ Add New</button>
+        <span class="topbar-time" id="topbar-time"></span>
+        <button class="topbar-refresh" onclick="refreshCurrent()" title="Refresh">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+        <button class="topbar-add-btn" onclick="openAddModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Record
+        </button>
       </div>
+    </header>
+
+    <!-- Offline banner -->
+    <div id="offline-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      You are offline — viewing cached data. Changes will not be saved.
     </div>
 
+    <!-- Content -->
     <div id="content">
-      <!-- DASHBOARD -->
+
+      <!-- ──────── DASHBOARD ──────── -->
       <div class="page active" id="page-dashboard">
-        <div id="dashboard-inner"><div class="loading"><div class="loading-spinner"></div><br>Loading...</div></div>
+        <div id="dashboard-inner">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <span style="font-size:12px;color:var(--text3)">Loading data…</span>
+          </div>
+        </div>
       </div>
-      <!-- INSURANCE -->
+
+      <!-- ──────── INSURANCE RECORDS ──────── -->
       <div class="page" id="page-insurance">
-        <div class="page-header">
-          <div class="page-title">🛡 Insurance Records <span style="font-size:16px;color:var(--text2);font-family:var(--font-ui);font-weight:400;" id="ins-count"></span></div>
-          <div class="page-sub">GSIS insurance tracking</div>
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-head-title">
+              Insurance Records
+              <span class="page-head-count" id="ins-count"></span>
+            </div>
+            <div class="page-head-sub">GSIS vehicle insurance tracking — Municipality of Balayan</div>
+          </div>
         </div>
-        <div class="toolbar">
-          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" id="ins-search" placeholder="Search vehicle, plate, department…" oninput="filterInsurance()"></div>
+
+        <div class="search-row">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="search-input" type="search" id="ins-search" placeholder="Search vehicle, plate, department…" oninput="filterInsurance()">
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active" id="ins-view-table" onclick="setInsView('table')" title="Table view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+            <button class="view-btn" id="ins-view-card" onclick="setInsView('card')" title="Card view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="pills" id="ins-pills"></div>
-        <div id="ins-table-area"></div>
-        <div class="mobile-cards" id="ins-cards"></div>
+
+        <div class="pills-scroll" id="ins-pills" style="margin-bottom:14px"></div>
+
+        <div class="table-view" id="ins-table-area"></div>
+        <div id="ins-cards"></div>
       </div>
-      <!-- LTO REGISTRATION -->
+
+      <!-- ──────── LTO REGISTRATION ──────── -->
       <div class="page" id="page-lto">
-        <div class="page-header">
-          <div class="page-title">🚘 LTO Registration <span style="font-size:16px;color:var(--text2);font-family:var(--font-ui);font-weight:400;" id="lto-count"></span></div>
-          <div class="page-sub">LTO registration expiry tracking</div>
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-head-title">
+              LTO Registration
+              <span class="page-head-count" id="lto-count"></span>
+            </div>
+            <div class="page-head-sub">LTO vehicle registration renewal tracking — Municipality of Balayan</div>
+          </div>
         </div>
-        <div class="toolbar">
-          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" id="lto-search" placeholder="Search vehicle, plate, department…" oninput="filterLTO()"></div>
+
+        <div class="search-row">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="search-input" type="search" id="lto-search" placeholder="Search vehicle, plate, department…" oninput="filterLTO()">
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active" id="lto-view-table" onclick="setLtoView('table')" title="Table view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+            <button class="view-btn" id="lto-view-card" onclick="setLtoView('card')" title="Card view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="pills" id="lto-pills"></div>
-        <div id="lto-table-area"></div>
-        <div class="mobile-cards" id="lto-cards"></div>
-      </div>
-    </div>
 
-    <div id="bottom-nav">
-      <div class="bnav-inner">
-        <button class="bnav-btn active" id="bnav-dashboard" onclick="switchPage('dashboard')"><span class="bnav-icon">📊</span>Dashboard</button>
-        <button class="bnav-btn" id="bnav-insurance" onclick="switchPage('insurance')"><span class="bnav-icon">🛡</span>Insurance</button>
-        <button class="bnav-btn" id="bnav-lto" onclick="switchPage('lto')"><span class="bnav-icon">🚘</span>LTO Reg.</button>
-      </div>
-    </div>
-  </div>
-</div>
+        <div class="pills-scroll" id="lto-pills" style="margin-bottom:14px"></div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="modal-record" onclick="closeOverlay(event,'modal-record')">
+        <div class="table-view" id="lto-table-area"></div>
+        <div id="lto-cards"></div>
+      </div>
+
+    </div><!-- /#content -->
+  </div><!-- /#main -->
+</div><!-- /#shell -->
+
+<!-- ════════════════════════════════
+     MODAL — RECORD DETAIL
+════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-record" onclick="closeOverlay(event,'modal-record')">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="rec-title">Record</div><button class="modal-close" onclick="closeModal('modal-record')">✕</button></div>
+    <div class="modal-head">
+      <div class="modal-icon ins" id="rec-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <span class="modal-title" id="rec-title">Record</span>
+      <button class="modal-close" onclick="closeModal('modal-record')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
     <div class="modal-body" id="rec-body"></div>
   </div>
 </div>
-<div class="modal-overlay" id="modal-form" onclick="closeOverlay(event,'modal-form')">
+
+<!-- ════════════════════════════════
+     MODAL — ADD / EDIT FORM
+════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-form" onclick="closeOverlay(event,'modal-form')">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="form-title">Add Record</div><button class="modal-close" onclick="closeModal('modal-form')">✕</button></div>
+    <div class="modal-head">
+      <div class="modal-icon form">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+      <span class="modal-title" id="form-title">Add Record</span>
+      <button class="modal-close" onclick="closeModal('modal-form')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
     <div class="modal-body" id="form-body"></div>
   </div>
 </div>
-<div class="toast" id="toast"></div>
-<button class="fab" id="fab-btn" onclick="openAddModal()">＋</button>
 
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════════════════
+     FIREBASE + APP LOGIC  (unchanged from original)
+════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -764,606 +1051,867 @@ const firebaseConfig = {
 };
 
 (function initApp() {
-  try {
-    const app = initializeApp(firebaseConfig);
-    const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+try {
+  const app = initializeApp(firebaseConfig);
+  const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
 
-    // ── Online/Offline ──
-    let isOnline = navigator.onLine;
-    function setOnlineState(online) {
-      isOnline = online;
-      document.getElementById('offline-banner').classList.toggle('show', !online);
-      ['fab-btn','topbar-add-btn'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=online?'':'none'; });
+  // ── Online / Offline ──
+  let isOnline = navigator.onLine;
+  function updateOnline(){
+    isOnline = navigator.onLine;
+    const dot  = document.getElementById('sb-status-dot');
+    const txt  = document.getElementById('sb-status-text');
+    const ban  = document.getElementById('offline-banner');
+    const addBtn = document.getElementById('topbar-add-btn');
+    if(isOnline){
+      dot.style.background='var(--emerald)';
+      dot.style.boxShadow='0 0 8px rgba(16,185,129,.6)';
+      txt.textContent='Connected';
+      ban.classList.remove('show');
+      if(addBtn) addBtn.style.display='';
+    } else {
+      dot.style.background='var(--amber)';
+      dot.style.boxShadow='0 0 8px rgba(245,158,11,.6)';
+      txt.textContent='Offline';
+      ban.classList.add('show');
+      if(addBtn) addBtn.style.display='none';
     }
-    window.addEventListener('online',  ()=>{ setOnlineState(true);  toast('Back online!','success'); });
-    window.addEventListener('offline', ()=>{ setOnlineState(false); });
-    setOnlineState(navigator.onLine);
+  }
+  window.addEventListener('online', ()=>{ updateOnline(); toast('Back online!','success'); });
+  window.addEventListener('offline', updateOnline);
+  updateOnline();
 
-    // ══ STATE ══
-    const S = {
-      page:'dashboard',
-      records:[], // all vehicle_insurance docs
-      insFilter:'All', insSearch:'',
-      ltoFilter:'All', ltoSearch:'',
-      editId:null, editMode:null, // 'insurance' or 'lto'
-    };
-    const MONTHS=['All','JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  // ── State ──
+  const S = {
+    page:'dashboard', records:[], editId:null, editMode:'insurance',
+    insFilter:'All', ltoFilter:'All',
+    insSearch:'', ltoSearch:'',
+    insView:'table', ltoView:'table'
+  };
 
-    // ══ FIRESTORE ══
-    const col = () => collection(db,'vehicle_insurance');
-    async function getAll()          { const s=await getDocs(col()); return s.docs.map(d=>({id:d.id,...d.data()})); }
-    async function addRec(data)      { return await addDoc(col(), data); }
-    async function updateRec(id,data){ return await updateDoc(doc(db,'vehicle_insurance',id), data); }
-    async function deleteRec(id)     { return await deleteDoc(doc(db,'vehicle_insurance',id)); }
+  const MONTHS=['All','JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE',
+                'JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
 
-    // ══ CLOCK ══
-    function updateTime(){
-      const now=new Date();
-      document.getElementById('topbar-time').textContent=now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      document.getElementById('sidebar-time').textContent=now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+  // ── Clock ──
+  function updateTime(){
+    const now=new Date();
+    document.getElementById('topbar-time').textContent=now.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('sidebar-time').textContent=now.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+  }
+  setInterval(updateTime,1000); updateTime();
+
+  // ── Navigation ──
+  function switchPage(pg){
+    S.page=pg;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.getElementById(`page-${pg}`).classList.add('active');
+    document.getElementById(`snav-${pg}`)?.classList.add('active');
+    const titles={dashboard:'Dashboard',insurance:'Insurance Records',lto:'LTO Registration'};
+    document.getElementById('topbar-title').textContent=titles[pg]||pg;
+    closeSidebar();
+    if(pg==='dashboard') loadDashboard();
+    else if(pg==='insurance') loadInsurance();
+    else if(pg==='lto') loadLTO();
+  }
+  window.switchPage=switchPage;
+  window.refreshCurrent=()=>switchPage(S.page);
+
+  function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
+  function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
+  window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
+
+  // ── Firestore helpers ──
+  const col = () => collection(db,'vehicle_insurance');
+  async function getAll()          { const s=await getDocs(col()); return s.docs.map(d=>({id:d.id,...d.data()})); }
+  async function addRec(data)      { return await addDoc(col(), data); }
+  async function updateRec(id,data){ return await updateDoc(doc(db,'vehicle_insurance',id), data); }
+  async function deleteRec(id)     { return await deleteDoc(doc(db,'vehicle_insurance',id)); }
+
+  // ── Date helpers ──
+  function normDateStr(s){ return s.replace(/\b([A-Z]{2,})\b/g,w=>w.charAt(0)+w.slice(1).toLowerCase()); }
+  function safeParse(s){ const d=new Date(normDateStr(s.trim())); return isNaN(d)?null:d; }
+  function parseInsDate(dateStr){
+    if(!dateStr||dateStr==='null') return null;
+    const s=String(dateStr).trim();
+    const toMatch=s.match(/^.+?\s+to\s+(.+)$/i);
+    if(toMatch){const d=safeParse(toMatch[1]);if(d)return d;}
+    const dashMatch=s.match(/^.+?\s+[-–]\s+([A-Za-z].+)$/);
+    if(dashMatch){const d=safeParse(dashMatch[1]);if(d)return d;}
+    const direct=safeParse(s); if(direct)return direct;
+    const rm=s.match(/([A-Za-z]+)\s+\d+[-–]\s*(\d+),?\s*(\d{4})/);
+    if(rm){const d=safeParse(`${rm[1]} ${rm[2]}, ${rm[3]}`);if(d)return d;}
+    const parts=s.replace(/[,\/]/g,' ').split(/\s+/).filter(Boolean);
+    if(parts.length>=3){const d=safeParse(parts.join(' '));if(d)return d;}
+    return null;
+  }
+  function toInputDate(d){ if(!d||isNaN(d))return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+  function splitLegacyInsDate(str){
+    if(!str)return{from:'',to:''};
+    const s=String(str).trim();
+    let pts=s.split(/\s+to\s+/i);
+    if(pts.length<2)pts=s.split(/\s+[-–]\s+/);
+    if(pts.length===2){const df=safeParse(pts[0]),dt=safeParse(pts[1]);return{from:df?toInputDate(df):'',to:dt?toInputDate(dt):''}}
+    return{from:'',to:''};
+  }
+  function getInsExpiry(i){ return i.insurance_date_to||i.insurance_date||null; }
+  function insDateRangeDisplay(i){
+    if(i.insurance_date_from||i.insurance_date_to){
+      const from=i.insurance_date_from?fmtDate(i.insurance_date_from):'—';
+      const to=i.insurance_date_to?fmtDate(i.insurance_date_to):'—';
+      return `${from} → ${to}`;
     }
-    setInterval(updateTime,1000); updateTime();
+    return i.insurance_date||i.insurance_month||'';
+  }
+  function insStatus(dateStr, warnDays=14){
+    const d=parseInsDate(dateStr);
+    if(!d)return{type:'unknown',days:null};
+    const today=new Date(); today.setHours(0,0,0,0); d.setHours(0,0,0,0);
+    const diff=Math.round((d-today)/86400000);
+    if(diff<0)  return{type:'expired',days:Math.abs(diff)};
+    if(diff<=warnDays) return{type:'warning',days:diff};
+    return{type:'ok',days:diff};
+  }
+  function endDateDisplay(dateStr){
+    if(!dateStr||dateStr==='null')return null;
+    const d=parseInsDate(dateStr);
+    if(!d)return null;
+    return d.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+  }
 
-    // ══ NAVIGATION ══
-    function switchPage(pg){
-      S.page=pg;
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      document.querySelectorAll('.nav-item,.bnav-btn').forEach(b=>b.classList.remove('active'));
-      document.getElementById(`page-${pg}`).classList.add('active');
-      document.getElementById(`snav-${pg}`)?.classList.add('active');
-      document.getElementById(`bnav-${pg}`)?.classList.add('active');
-      const titles={dashboard:'Dashboard',insurance:'Insurance Records',lto:'LTO Registration'};
-      document.getElementById('topbar-title').textContent=titles[pg]||pg;
-      closeSidebar();
-      if(pg==='dashboard') loadDashboard();
-      else if(pg==='insurance') loadInsurance();
-      else if(pg==='lto') loadLTO();
-    }
-    window.switchPage=switchPage;
-    window.refreshCurrent=()=>switchPage(S.page);
-    function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open'); }
-    function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
-    window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
+  // ── Status badge HTML ──
+  function statusBadge(type, days){
+    const svgCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const svgX     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const svgWarn  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    if(type==='expired') return `<span class="badge badge-red">${svgX} Expired ${days}d ago</span>`;
+    if(type==='warning') return `<span class="badge badge-amber">${svgWarn} Due in ${days===0?'Today':days+'d'}</span>`;
+    if(type==='ok')      return `<span class="badge badge-green">${svgCheck} Active — ${days}d left</span>`;
+    return `<span class="badge badge-muted">Unknown</span>`;
+  }
 
-    // ══ DATE HELPERS ══
-    function normDateStr(s){ return s.replace(/\b([A-Z]{2,})\b/g,w=>w.charAt(0)+w.slice(1).toLowerCase()); }
-    function safeParse(s){ const d=new Date(normDateStr(s.trim())); return isNaN(d)?null:d; }
-    function parseInsDate(dateStr){
-      if(!dateStr||dateStr==='null') return null;
-      const s=String(dateStr).trim();
-      const toMatch=s.match(/^.+?\s+to\s+(.+)$/i);
-      if(toMatch){const d=safeParse(toMatch[1]);if(d)return d;}
-      const dashMatch=s.match(/^.+?\s+[-–]\s+([A-Za-z].+)$/);
-      if(dashMatch){const d=safeParse(dashMatch[1]);if(d)return d;}
-      const direct=safeParse(s); if(direct)return direct;
-      const rm=s.match(/([A-Za-z]+)\s+\d+[-–]\s*(\d+),?\s*(\d{4})/);
-      if(rm){const d=safeParse(`${rm[1]} ${rm[2]}, ${rm[3]}`);if(d)return d;}
-      const parts=s.replace(/[,\/]/g,' ').split(/\s+/).filter(Boolean);
-      if(parts.length>=3){const d=safeParse(parts.join(' '));if(d)return d;}
-      return null;
-    }
-    function toInputDate(d){ if(!d||isNaN(d))return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-    function splitLegacyInsDate(str){
-      if(!str)return{from:'',to:''};
-      const s=String(str).trim();
-      let pts=s.split(/\s+to\s+/i);
-      if(pts.length<2)pts=s.split(/\s+[-–]\s+/);
-      if(pts.length===2){const df=safeParse(pts[0]),dt=safeParse(pts[1]);return{from:df?toInputDate(df):'',to:dt?toInputDate(dt):''};}
-      return{from:'',to:''};
-    }
-    function getInsExpiry(i){ return i.insurance_date_to||i.insurance_date||null; }
-    function insDateRangeDisplay(i){
-      if(i.insurance_date_from||i.insurance_date_to){
-        const from=i.insurance_date_from?fmtDate(i.insurance_date_from):'—';
-        const to=i.insurance_date_to?fmtDate(i.insurance_date_to):'—';
-        return `${from} → ${to}`;
-      }
-      return i.insurance_date||i.insurance_month||'';
-    }
-    function insStatus(dateStr, warnDays=14){
-      const d=parseInsDate(dateStr);
-      if(!d)return{type:'unknown',days:null};
-      const today=new Date(); today.setHours(0,0,0,0); d.setHours(0,0,0,0);
-      const diff=Math.round((d-today)/86400000);
-      if(diff<0)  return{type:'expired',days:Math.abs(diff)};
-      if(diff<=warnDays) return{type:'warning',days:diff};
-      return{type:'ok',days:diff};
-    }
-    function endDateDisplay(dateStr){
-      if(!dateStr||dateStr==='null')return null;
-      const d=parseInsDate(dateStr);
-      if(!d)return null;
-      return d.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
-    }
+  // ── Alert row helper ──
+  function alertRow(i, statusObj, metaStr, onclick){
+    const s=statusObj;
+    const colorCls = s.type==='expired'?'red':s.type==='warning'?'amber':'green';
+    const daysLabel = s.type==='expired'?`Expired ${s.days}d ago`:s.days===0?'Due Today':`Due in ${s.days}d`;
+    return `<div class="alert-row ${colorCls}" onclick="${onclick}">
+      <div class="alert-dot ${colorCls}"></div>
+      <div class="alert-info">
+        <div class="alert-name">${i.vehicle_name||'-'} <span style="font-family:var(--mono);font-size:9px;opacity:.6;font-weight:400">${i.plate_number||''}</span></div>
+        <div class="alert-meta">${metaStr}</div>
+      </div>
+      <div class="alert-days ${colorCls}">${daysLabel}</div>
+    </div>`;
+  }
 
-    // ══ SHARED ALERT ROW ══
-    function alertRow(i, statusObj, metaStr, onclick){
-      const s=statusObj;
-      const cls=s.type==='expired'?'ins-alert-expired':s.type==='warning'?'ins-alert-warning':'ins-alert-ok';
-      const icon=s.type==='expired'?'🔴':s.type==='warning'?'🟡':'🟢';
-      const daysLabel=s.type==='expired'?`Expired ${s.days}d ago`:s.days===0?'Due Today':`Due in ${s.days}d`;
-      return `<div class="ins-alert-bar ${cls}" onclick="${onclick}">
-        <span class="ins-alert-icon">${icon}</span>
-        <div class="ins-alert-info">
-          <div class="ins-alert-name">${i.vehicle_name||'-'} <span style="opacity:.6;font-weight:400;font-size:11px">${i.plate_number||''}</span></div>
-          <div class="ins-alert-meta">${metaStr}</div>
-        </div>
-        <div class="ins-alert-days">${daysLabel}</div>
-      </div>`;
-    }
+  // ════════════════════════════════
+  // DASHBOARD
+  // ════════════════════════════════
+  async function loadDashboard(){
+    const el=document.getElementById('dashboard-inner');
+    el.innerHTML=`<div class="loading-state"><div class="spinner"></div><span style="font-size:12px;color:var(--text3)">Loading data…</span></div>`;
+    S.records=await getAll();
+    updateBadges();
 
-    // ══ DASHBOARD ══
-    async function loadDashboard(){
-      const el=document.getElementById('dashboard-inner');
-      el.innerHTML='<div class="loading"><div class="loading-spinner"></div><br>Loading...</div>';
-      S.records=await getAll();
-      updateBadges();
+    const today=new Date(); today.setHours(0,0,0,0);
+    const todayStr=today.toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-      const today=new Date(); today.setHours(0,0,0,0);
-      const todayStr=today.toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const insW=S.records.map(i=>({...i,_is:insStatus(getInsExpiry(i),14)}));
+    const insExp  =insW.filter(i=>i._is.type==='expired').sort((a,b)=>b._is.days-a._is.days);
+    const insWarn =insW.filter(i=>i._is.type==='warning').sort((a,b)=>a._is.days-b._is.days);
+    const insOk   =insW.filter(i=>i._is.type==='ok');
+    const insUpcoming=insOk.slice().sort((a,b)=>a._is.days-b._is.days).slice(0,5);
 
-      // ── Insurance stats (14-day warning) ──
-      const insW=S.records.map(i=>({...i,_is:insStatus(getInsExpiry(i),14)}));
-      const insExp  =insW.filter(i=>i._is.type==='expired').sort((a,b)=>b._is.days-a._is.days);
-      const insWarn =insW.filter(i=>i._is.type==='warning').sort((a,b)=>a._is.days-b._is.days);
-      const insOk   =insW.filter(i=>i._is.type==='ok');
-      const insUpcoming=insOk.slice().sort((a,b)=>a._is.days-b._is.days).slice(0,5);
+    const ltoW=S.records.filter(i=>i.registration_date||i.registration_month).map(i=>({...i,_ls:insStatus(i.registration_date,7)}));
+    const ltoExp  =ltoW.filter(i=>i._ls.type==='expired').sort((a,b)=>b._ls.days-a._ls.days);
+    const ltoWarn =ltoW.filter(i=>i._ls.type==='warning').sort((a,b)=>a._ls.days-b._ls.days);
+    const ltoOk   =ltoW.filter(i=>i._ls.type==='ok');
+    const ltoUpcoming=ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days).slice(0,5);
 
-      // ── LTO stats (7-day warning) ──
-      const ltoW=S.records.filter(i=>i.registration_date||i.registration_month).map(i=>({...i,_ls:insStatus(i.registration_date,7)}));
-      const ltoExp  =ltoW.filter(i=>i._ls.type==='expired').sort((a,b)=>b._ls.days-a._ls.days);
-      const ltoWarn =ltoW.filter(i=>i._ls.type==='warning').sort((a,b)=>a._ls.days-b._ls.days);
-      const ltoOk   =ltoW.filter(i=>i._ls.type==='ok');
-      const ltoUpcoming=ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days).slice(0,5);
+    const totalAlerts = insExp.length+insWarn.length+ltoExp.length+ltoWarn.length;
 
-      // Build explicit HTML strings for each section outside the template literal
-      let insAttentionHtml = '';
-      if(insExp.length){
-        insAttentionHtml += `<div class="ins-section-label red">🔴 Expired (${insExp.length})</div>`;
-        insAttentionHtml += insExp.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
-      }
-      if(insWarn.length){
-        insAttentionHtml += `<div class="ins-section-label yellow">🟡 Due Soon (${insWarn.length})</div>`;
-        insAttentionHtml += insWarn.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
-      }
-      if(!insExp.length && !insWarn.length) insAttentionHtml = `<div style="font-size:12px;color:var(--emerald);padding:8px 0">✅ No expired or near-expiry insurance.</div>`;
+    el.innerHTML=`
+      <!-- Date -->
+      <div class="dash-date-strip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        ${todayStr}
+      </div>
 
-      let ltoAttentionHtml = '';
-      if(ltoExp.length){
-        ltoAttentionHtml += `<div class="ins-section-label red">🔴 Expired (${ltoExp.length})</div>`;
-        ltoAttentionHtml += ltoExp.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
-      }
-      if(ltoWarn.length){
-        ltoAttentionHtml += `<div class="ins-section-label yellow">🟡 Due Soon (${ltoWarn.length})</div>`;
-        ltoAttentionHtml += ltoWarn.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
-      }
-      if(!ltoExp.length && !ltoWarn.length) ltoAttentionHtml = `<div style="font-size:12px;color:var(--emerald);padding:8px 0">✅ No expired or near-expiry LTO registrations.</div>`;
-
-      let insUpcomingHtml = insUpcoming.length
-        ? `<div class="ins-section-label default">📋 Upcoming Renewals</div>${insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('')}`
-        : '';
-      let ltoUpcomingHtml = ltoUpcoming.length
-        ? `<div class="ins-section-label default">📋 Upcoming Renewals</div>${ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('')}`
-        : '';
-
-      el.innerHTML=`
-        <div style="font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-bottom:16px;">📅 ${todayStr}</div>
-        <div class="dash-split">
-          <!-- ── INSURANCE COLUMN ── -->
-          <div class="dash-split-col">
-            <div class="dash-col-title ins">🛡 Insurance Status</div>
-            <div class="stats-row" id="ins-stats-row">
-              <div class="stat-card-sm" id="ins-card-expired" onclick="toggleStatList('ins','expired')">
-                <div class="stat-num-sm red">${insExp.length}</div><div class="stat-label-sm">Expired</div>
-              </div>
-              <div class="stat-card-sm" id="ins-card-warning" onclick="toggleStatList('ins','warning')">
-                <div class="stat-num-sm yellow">${insWarn.length}</div><div class="stat-label-sm">Due ≤14d</div>
-              </div>
-              <div class="stat-card-sm" id="ins-card-ok" onclick="toggleStatList('ins','ok')">
-                <div class="stat-num-sm green">${insOk.length}</div><div class="stat-label-sm">Active</div>
-              </div>
-              <div class="stat-listbox" id="ins-listbox"></div>
+      <!-- Two-column grid -->
+      <div class="dash-grid">
+        <!-- INSURANCE COL -->
+        <div class="dash-col">
+          <div class="dash-col-head">
+            <div class="dash-col-icon ins">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <div class="alert-summary">
-              <div class="alert-chip alert-chip-red">🔴 ${insExp.length} Expired</div>
-              <div class="alert-chip alert-chip-yellow">🟡 ${insWarn.length} Due within 2 weeks</div>
-              <div class="alert-chip alert-chip-green">🟢 ${insOk.length} Active</div>
+            <div class="dash-col-head-text">
+              <div class="dash-col-title">Insurance Status</div>
+              <div class="dash-col-sub">GSIS vehicle insurance</div>
+            </div>
+            <button class="dash-col-btn" onclick="switchPage('insurance')">View all →</button>
+          </div>
+          <div class="dash-col-body">
+            <div class="dash-stats-grid" id="ins-stats-row">
+              <div class="dash-stat-card" id="ins-card-expired" onclick="toggleStatList('ins','expired')">
+                <div class="dash-stat-num red">${insExp.length}</div>
+                <div class="dash-stat-lbl">Expired</div>
+              </div>
+              <div class="dash-stat-card" id="ins-card-warning" onclick="toggleStatList('ins','warning')">
+                <div class="dash-stat-num amber">${insWarn.length}</div>
+                <div class="dash-stat-lbl">Due ≤14d</div>
+              </div>
+              <div class="dash-stat-card" id="ins-card-ok" onclick="toggleStatList('ins','ok')">
+                <div class="dash-stat-num green">${insOk.length}</div>
+                <div class="dash-stat-lbl">Active</div>
+              </div>
+              <div class="stat-listbox" id="ins-listbox" style="grid-column:1/-1"></div>
             </div>
             <div id="ins-attention-slot"></div>
             <div id="ins-upcoming-slot"></div>
-            <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('insurance')">View All Insurance →</button></div>
           </div>
+        </div>
 
-          <!-- ── LTO COLUMN ── -->
-          <div class="dash-split-col">
-            <div class="dash-col-title lto">🚘 LTO Registration Status</div>
-            <div class="stats-row" id="lto-stats-row">
-              <div class="stat-card-sm" id="lto-card-expired" onclick="toggleStatList('lto','expired')">
-                <div class="stat-num-sm red">${ltoExp.length}</div><div class="stat-label-sm">Expired</div>
-              </div>
-              <div class="stat-card-sm" id="lto-card-warning" onclick="toggleStatList('lto','warning')">
-                <div class="stat-num-sm yellow">${ltoWarn.length}</div><div class="stat-label-sm">Due ≤7d</div>
-              </div>
-              <div class="stat-card-sm" id="lto-card-ok" onclick="toggleStatList('lto','ok')">
-                <div class="stat-num-sm green">${ltoOk.length}</div><div class="stat-label-sm">Active</div>
-              </div>
-              <div class="stat-listbox" id="lto-listbox"></div>
+        <!-- LTO COL -->
+        <div class="dash-col">
+          <div class="dash-col-head">
+            <div class="dash-col-icon lto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
             </div>
-            <div class="alert-summary">
-              <div class="alert-chip alert-chip-red">🔴 ${ltoExp.length} Expired</div>
-              <div class="alert-chip alert-chip-yellow">🟡 ${ltoWarn.length} Due within 1 week</div>
-              <div class="alert-chip alert-chip-green">🟢 ${ltoOk.length} Active</div>
+            <div class="dash-col-head-text">
+              <div class="dash-col-title">LTO Registration</div>
+              <div class="dash-col-sub">Vehicle registration renewals</div>
+            </div>
+            <button class="dash-col-btn" onclick="switchPage('lto')">View all →</button>
+          </div>
+          <div class="dash-col-body">
+            <div class="dash-stats-grid" id="lto-stats-row">
+              <div class="dash-stat-card" id="lto-card-expired" onclick="toggleStatList('lto','expired')">
+                <div class="dash-stat-num red">${ltoExp.length}</div>
+                <div class="dash-stat-lbl">Expired</div>
+              </div>
+              <div class="dash-stat-card" id="lto-card-warning" onclick="toggleStatList('lto','warning')">
+                <div class="dash-stat-num amber">${ltoWarn.length}</div>
+                <div class="dash-stat-lbl">Due ≤7d</div>
+              </div>
+              <div class="dash-stat-card" id="lto-card-ok" onclick="toggleStatList('lto','ok')">
+                <div class="dash-stat-num green">${ltoOk.length}</div>
+                <div class="dash-stat-lbl">Active</div>
+              </div>
+              <div class="stat-listbox" id="lto-listbox" style="grid-column:1/-1"></div>
             </div>
             <div id="lto-attention-slot"></div>
             <div id="lto-upcoming-slot"></div>
-            <div style="margin-top:12px;text-align:right"><button class="btn btn-default btn-sm" onclick="switchPage('lto')">View All LTO →</button></div>
           </div>
-        </div>`;
-
-      // ── Inject dynamic sections via DOM (avoids template literal truncation) ──
-      document.getElementById('ins-attention-slot').innerHTML = insAttentionHtml;
-      document.getElementById('ins-upcoming-slot').innerHTML  = insUpcomingHtml;
-      document.getElementById('lto-attention-slot').innerHTML = ltoAttentionHtml;
-      document.getElementById('lto-upcoming-slot').innerHTML  = ltoUpcomingHtml;
-
-      // Store categorised lists for the listbox toggles
-      window._dashData = { insExp, insWarn, insOk: insOk.slice().sort((a,b)=>a._is.days-b._is.days), ltoExp, ltoWarn, ltoOk: ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days) };
-    }
-
-    // ══ STAT LISTBOX TOGGLE ══
-    function toggleStatList(col, type) {
-      const lb    = document.getElementById(`${col}-listbox`);
-      const cards = { expired:`${col}-card-expired`, warning:`${col}-card-warning`, ok:`${col}-card-ok` };
-      const colorMap = { expired:'active-red', warning:'active-yellow', ok:'active-green' };
-      const data  = window._dashData || {};
-      const isMode = col==='ins';
-      const lists  = isMode
-        ? { expired: data.insExp||[], warning: data.insWarn||[], ok: data.insOk||[] }
-        : { expired: data.ltoExp||[], warning: data.ltoWarn||[], ok: data.ltoOk||[] };
-      const labels = { expired:'🔴 Expired', warning:'🟡 Due Soon', ok:'🟢 Active' };
-
-      // If same card clicked again → close
-      const alreadyOpen = lb.classList.contains('open') && lb.dataset.type===type;
-      // Reset all cards
-      Object.values(cards).forEach(id=>{ const el=document.getElementById(id); if(el) el.className='stat-card-sm'; });
-      lb.classList.remove('open');
-      if(alreadyOpen) return;
-
-      // Highlight active card
-      const activeCard = document.getElementById(cards[type]);
-      if(activeCard) activeCard.classList.add(colorMap[type]);
-      lb.dataset.type = type;
-
-      const items = lists[type] || [];
-      if(!items.length){ lb.classList.remove('open'); return; }
-
-      const rows = items.map(i => {
-        const s   = isMode ? i._is : i._ls;
-        const daysLabel = s.type==='expired' ? `Expired ${s.days}d ago` : s.days===0 ? 'Due Today' : `Due in ${s.days}d`;
-        const dayColor  = s.type==='expired' ? 'var(--red)' : s.type==='warning' ? '#e3b341' : 'var(--green)';
-        const meta = isMode
-          ? (i.insurance_date_from||i.insurance_date_to ? `${fmtDate(i.insurance_date_from)||'?'} → ${fmtDate(i.insurance_date_to)||'?'}` : (i.insurance_date||i.insurance_month||''))
-          : `Reg: ${fmtDate(i.registration_date)}`;
-        const recMode = isMode ? 'insurance' : 'lto';
-        return `<div class="stat-list-row" onclick="showRecordModal('${i.id}','${recMode}')">
-          <div class="stat-list-left">
-            <div class="stat-list-name">${i.vehicle_name||'-'} <span style="font-family:var(--font-mono);font-size:10px;color:var(--accent);font-weight:400">${i.plate_number||''}</span></div>
-            <div class="stat-list-meta">${i.department||''} · ${meta}</div>
-          </div>
-          <div class="stat-list-days" style="color:${dayColor}">${daysLabel}</div>
-        </div>`;
-      }).join('');
-
-      lb.innerHTML = `
-        <div class="stat-listbox-header">
-          <span>${labels[type]} — ${items.length} record${items.length!==1?'s':''}</span>
-          <button class="stat-listbox-close" onclick="toggleStatList('${col}','${type}')">✕</button>
-        </div>
-        <div class="stat-listbox-inner">${rows}</div>`;
-      lb.classList.add('open');
-    }
-    window.toggleStatList = toggleStatList;
-
-    function updateBadges(){
-      document.getElementById('badge-insurance').textContent=S.records.length;
-      const ltoCount=S.records.filter(i=>i.registration_date||i.registration_month).length;
-      document.getElementById('badge-lto').textContent=ltoCount;
-    }
-
-    // ══ INSURANCE PAGE ══
-    async function loadInsurance(){
-      document.getElementById('ins-table-area').innerHTML='<div class="loading"><div class="loading-spinner"></div><br>Loading...</div>';
-      S.records=await getAll(); updateBadges();
-      document.getElementById('ins-count').textContent=`(${S.records.length})`;
-      renderInsPills(); renderInsTable(); renderInsCards();
-    }
-    function renderInsPills(){ document.getElementById('ins-pills').innerHTML=MONTHS.map(m=>`<div class="pill ${m===S.insFilter?'active':''}" onclick="setInsFilter('${m}')">${m==='All'?'All':m.slice(0,3)}</div>`).join(''); }
-    window.setInsFilter=m=>{S.insFilter=m;renderInsPills();renderInsTable();renderInsCards();};
-    function filteredIns(){
-      const q=S.insSearch.toLowerCase();
-      let list=S.records;
-      if(S.insFilter!=='All') list=list.filter(i=>(i.insurance_month||'').toUpperCase()===S.insFilter);
-      if(q) list=list.filter(i=>[i.vehicle_name,i.plate_number,i.department,i.mv_file_no,i.insurance_month,i.remarks].join(' ').toLowerCase().includes(q));
-      return list;
-    }
-    function filterInsurance(){
-      S.insSearch=(document.getElementById('ins-search').value||'').toLowerCase();
-      document.getElementById('ins-count').textContent=`(${filteredIns().length})`;
-      renderInsTable(); renderInsCards();
-    }
-    window.filterInsurance=filterInsurance;
-    function renderInsTable(){
-      const list=filteredIns(); const el=document.getElementById('ins-table-area');
-      if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🛡</div>No records found</div>';return;}
-      const st=i=>insStatus(getInsExpiry(i),14);
-      el.innerHTML=`<div class="table-wrap"><table><thead><tr>
-        <th>#</th><th>Vehicle</th><th class="hide-mobile">Dept</th><th>Plate</th>
-        <th class="hide-mobile">Insurance Period</th><th class="hide-mobile">Expiry</th><th>Status</th>
-      </tr></thead><tbody>
-        ${list.map(i=>{const s=st(i);const b=s.type==='expired'?`<span class="badge badge-red">Expired</span>`:s.type==='warning'?`<span class="badge badge-amber">Due Soon</span>`:`<span class="badge badge-green">Active</span>`;
-        return `<tr onclick="showRecordModal('${i.id}','insurance')"><td class="td-muted">${i.item_no||'-'}</td><td class="td-name">${i.vehicle_name||'-'}</td>
-          <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'-'}</td>
-          <td class="td-mono">${i.plate_number||'-'}</td>
-          <td class="hide-mobile td-muted">${insDateRangeDisplay(i)}</td>
-          <td class="hide-mobile td-muted">${endDateDisplay(getInsExpiry(i))||'—'}</td>
-          <td>${b}</td></tr>`;}).join('')}
-      </tbody></table></div>`;
-    }
-    function renderInsCards(){
-      const st=i=>insStatus(getInsExpiry(i),14);
-      document.getElementById('ins-cards').innerHTML=filteredIns().map((i,idx)=>{
-        const s=st(i);const b=s.type==='expired'?`<span class="badge badge-red">🔴 Expired</span>`:s.type==='warning'?`<span class="badge badge-amber">🟡 Due Soon</span>`:`<span class="badge badge-green">🟢 Active</span>`;
-        return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*0.02}s" onclick="showRecordModal('${i.id}','insurance')">
-          <div class="flex-between gap-8"><div class="m-card-title">${i.vehicle_name||'-'}</div><span class="badge badge-amber">${i.plate_number||'-'}</span></div>
-          <div class="m-card-row" style="margin-top:6px;">${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}<span>🛡 ${i.insurance_month||''}</span>${b}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}</div>
-        </div>`;}).join('');
-    }
-
-    async function loadLTO(){
-      document.getElementById('lto-table-area').innerHTML='<div class="loading"><div class="loading-spinner"></div><br>Loading...</div>';
-      S.records=await getAll(); updateBadges();
-      // Include records with registration_month OR registration_date (catches null-date affected records)
-      const ltoList=S.records.filter(i=>i.registration_date||i.registration_month);
-      document.getElementById('lto-count').textContent=`(${ltoList.length})`;
-      renderLTOPills(); renderLTOTable(); renderLTOCards();
-    }
-    function renderLTOPills(){ document.getElementById('lto-pills').innerHTML=MONTHS.map(m=>`<div class="pill ${m===S.ltoFilter?'active':''}" onclick="setLTOFilter('${m}')">${m==='All'?'All':m.slice(0,3)}</div>`).join(''); }
-    window.setLTOFilter=m=>{S.ltoFilter=m;renderLTOPills();renderLTOTable();renderLTOCards();};
-    function filteredLTO(){
-      const q=S.ltoSearch.toLowerCase();
-      // Show records with registration_date OR registration_month (missing date shows as fixable)
-      let list=S.records.filter(i=>i.registration_date||i.registration_month);
-      if(S.ltoFilter!=='All') list=list.filter(i=>(i.registration_month||'').toUpperCase()===S.ltoFilter);
-      if(q) list=list.filter(i=>[i.vehicle_name,i.plate_number,i.department,i.mv_file_no,i.registration_month].join(' ').toLowerCase().includes(q));
-      return list;
-    }
-    function filterLTO(){
-      S.ltoSearch=(document.getElementById('lto-search').value||'').toLowerCase();
-      document.getElementById('lto-count').textContent=`(${filteredLTO().length})`;
-      renderLTOTable(); renderLTOCards();
-    }
-    window.filterLTO=filterLTO;
-    function renderLTOTable(){
-      const list=filteredLTO(); const el=document.getElementById('lto-table-area');
-      if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🚘</div>No records found</div>';return;}
-      const st=i=>i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
-      el.innerHTML=`<div class="table-wrap"><table><thead><tr>
-        <th>#</th><th>Vehicle</th><th class="hide-mobile">Dept</th><th>Plate</th>
-        <th class="hide-mobile">Reg Month</th><th>Reg Date</th><th>Status</th>
-      </tr></thead><tbody>
-        ${list.map(i=>{const s=st(i);
-          const b=s.type==='expired'?`<span class="badge badge-red">Expired</span>`:
-                  s.type==='warning'?`<span class="badge badge-amber">Due Soon</span>`:
-                  s.type==='missing'?`<span class="badge badge-gray" style="color:#f0a500;border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.1)">⚠ Fix Date</span>`:
-                  `<span class="badge badge-green">Active</span>`;
-          const dateCell=i.registration_date?fmtDate(i.registration_date):`<span style="color:#f0a500;font-size:11px">— missing —</span>`;
-          return `<tr onclick="showRecordModal('${i.id}','lto')" style="${s.type==='missing'?'background:rgba(240,165,0,.04)':''}">
-            <td class="td-muted">${i.item_no||'-'}</td><td class="td-name">${i.vehicle_name||'-'}</td>
-            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'-'}</td>
-            <td class="td-mono">${i.plate_number||'-'}</td>
-            <td class="hide-mobile td-muted">${i.registration_month||'-'}</td>
-            <td class="td-muted">${dateCell}</td>
-            <td>${b}</td></tr>`;}).join('')}
-      </tbody></table></div>`;
-    }
-    function renderLTOCards(){
-      const st=i=>i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
-      document.getElementById('lto-cards').innerHTML=filteredLTO().map((i,idx)=>{
-        const s=st(i);
-        const b=s.type==='expired'?`<span class="badge badge-red">🔴 Expired</span>`:
-                s.type==='warning'?`<span class="badge badge-amber">🟡 Due Soon</span>`:
-                s.type==='missing'?`<span class="badge" style="color:#f0a500;border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.1)">⚠ Fix Date</span>`:
-                `<span class="badge badge-green">🟢 Active</span>`;
-        return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*0.02}s${s.type==='missing'?';border-color:rgba(240,165,0,.3)':''}" onclick="showRecordModal('${i.id}','lto')">
-          <div class="flex-between gap-8"><div class="m-card-title">${i.vehicle_name||'-'}</div><span class="badge badge-amber">${i.plate_number||'-'}</span></div>
-          <div class="m-card-row" style="margin-top:6px;">${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}<span>🚘 ${i.registration_month||''}</span>${b}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">Reg. Date: ${i.registration_date?fmtDate(i.registration_date):'<span style="color:#f0a500">missing — click to fix</span>'}</div>
-        </div>`;}).join('');
-    }
-
-    // ══ DETAIL MODAL ══
-    function showRecordModal(id, mode){
-      const i=S.records.find(x=>x.id===id); if(!i) return;
-      document.getElementById('rec-title').textContent=i.vehicle_name||'Record';
-      if(mode==='insurance'){
-        const st=insStatus(getInsExpiry(i),14);
-        const sb=st.type==='expired'?`<span class="badge badge-red">🔴 Expired ${st.days}d ago</span>`:st.type==='warning'?`<span class="badge badge-amber">🟡 Due in ${st.days===0?'Today':st.days+'d'}</span>`:`<span class="badge badge-green">🟢 Active — ${st.days}d left</span>`;
-        document.getElementById('rec-body').innerHTML=`
-          <div class="v-hero"><div class="v-hero-icon">🛡</div><div class="v-hero-name">${i.vehicle_name||'-'}</div>
-            <div class="v-hero-badges"><span class="badge badge-amber">${i.plate_number||'No Plate'}</span>${i.department?`<span class="badge badge-blue">${i.department}</span>`:''} ${sb}</div></div>
-          <div class="detail-section"><div class="detail-section-title">Insurance Details</div>
-            ${dr('Item No',i.item_no)}${dr('MV File No',i.mv_file_no,'mono')}${dr('Insurance Month',i.insurance_month)}
-            ${dr('Insurance From',i.insurance_date_from?fmtDate(i.insurance_date_from):(i.insurance_date||null))}
-            ${dr('Insurance To (Expiry)',i.insurance_date_to?fmtDate(i.insurance_date_to):endDateDisplay(i.insurance_date))}
-            ${dr('Remarks',i.remarks)}</div>
-          <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:4px;">
-            <button class="btn btn-danger" onclick="confirmDelete('${id}')">🗑 Delete</button>
-            <button class="btn btn-default" onclick="openEditModal('${id}','insurance')">✏️ Edit</button>
-          </div>`;
-      } else {
-        const st=insStatus(i.registration_date,7);
-        const sb=st.type==='expired'?`<span class="badge badge-red">🔴 Expired ${st.days}d ago</span>`:st.type==='warning'?`<span class="badge badge-amber">🟡 Due in ${st.days===0?'Today':st.days+'d'}</span>`:`<span class="badge badge-green">🟢 Active — ${st.days}d left</span>`;
-        document.getElementById('rec-body').innerHTML=`
-          <div class="v-hero"><div class="v-hero-icon">🚘</div><div class="v-hero-name">${i.vehicle_name||'-'}</div>
-            <div class="v-hero-badges"><span class="badge badge-amber">${i.plate_number||'No Plate'}</span>${i.department?`<span class="badge badge-blue">${i.department}</span>`:''} ${sb}</div></div>
-          <div class="detail-section"><div class="detail-section-title">LTO Registration Details</div>
-            ${dr('Item No',i.item_no)}${dr('MV File No',i.mv_file_no,'mono')}${dr('Registration Month',i.registration_month)}
-            ${dr('Registration Date',fmtDate(i.registration_date))}
-            ${dr('Remarks',i.remarks)}</div>
-          <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:4px;">
-            <button class="btn btn-danger" onclick="confirmDelete('${id}')">🗑 Delete</button>
-            <button class="btn btn-default" onclick="openEditModal('${id}','lto')">✏️ Edit</button>
-          </div>`;
-      }
-      openModal('modal-record');
-    }
-    window.showRecordModal=showRecordModal;
-
-    // ══ ADD / EDIT ══
-    function openAddModal(){
-      S.editId=null;
-      const mode=S.page==='lto'?'lto':'insurance';
-      S.editMode=mode;
-      document.getElementById('form-title').textContent=mode==='lto'?'Add LTO Registration':'Add Insurance Record';
-      document.getElementById('form-body').innerHTML=mode==='lto'?ltoForm():iForm();
-      openModal('modal-form');
-    }
-    window.openAddModal=openAddModal;
-
-    function openEditModal(id,mode){
-      S.editId=id; S.editMode=mode;
-      closeModal('modal-record');
-      const i=S.records.find(x=>x.id===id);
-      document.getElementById('form-title').textContent=mode==='lto'?'Edit LTO Registration':'Edit Insurance Record';
-      document.getElementById('form-body').innerHTML=mode==='lto'?ltoForm(i):iForm(i);
-      openModal('modal-form');
-    }
-    window.openEditModal=openEditModal;
-
-    function fi(name,label,v={},type='text'){ return `<div class="form-group"><label class="form-label">${label}</label><input class="form-input" type="${type}" name="${name}" value="${ea(v[name]||'')}"></div>`; }
-    function fta(name,label,v={}){ return `<div class="form-group form-full"><label class="form-label">${label}</label><textarea class="form-textarea" name="${name}">${eh(v[name]||'')}</textarea></div>`; }
-
-    // Insurance form — no registration fields
-    function iForm(i={}){
-      let fromVal=i.insurance_date_from||'';
-      let toVal=i.insurance_date_to||'';
-      if((!fromVal||!toVal)&&i.insurance_date){
-        const leg=splitLegacyInsDate(i.insurance_date);
-        if(!fromVal)fromVal=leg.from;
-        if(!toVal)toVal=leg.to;
-      }
-      return `<div class="form-grid" id="rform">
-        ${fi('vehicle_name','Vehicle Name',i)}${fi('plate_number','Plate Number',i)}
-        ${fi('department','Department',i)}${fi('mv_file_no','MV File No',i)}
-        ${fi('insurance_month','Insurance Month',i)}
-        <div class="form-group form-full">
-          <label class="form-label">Insurance Date (From → To / Expiry)</label>
-          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
-            <input class="form-input" type="date" name="insurance_date_from" value="${ea(fromVal)}">
-            <span style="color:var(--text2);font-size:18px;text-align:center;font-weight:300;">→</span>
-            <input class="form-input" type="date" name="insurance_date_to" value="${ea(toVal)}">
-          </div>
-        </div>
-        ${fta('remarks','Remarks',i)}
-        <div class="form-actions form-full">
-          <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
-          <button class="btn btn-primary" onclick="saveRecord()">💾 Save</button>
         </div>
       </div>`;
+
+    // Build alert sections
+    let insAttentionHtml='';
+    if(insExp.length){
+      insAttentionHtml+=`<div class="alert-section-label red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Expired (${insExp.length})</div>`;
+      insAttentionHtml+=insExp.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
+    }
+    if(insWarn.length){
+      insAttentionHtml+=`<div class="alert-section-label amber">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        Due Soon (${insWarn.length})</div>`;
+      insAttentionHtml+=insWarn.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
+    }
+    if(!insExp.length&&!insWarn.length){
+      insAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry insurance</p></div>`;
     }
 
-    // LTO form — only registration fields
-    function ltoForm(i={}){
-      // Normalize registration_date to YYYY-MM-DD for the date input
-      let regDate = i.registration_date||'';
-      if(regDate && regDate.includes('T')) regDate=regDate.substring(0,10);
-      if(regDate && regDate.includes(' ')) regDate=regDate.substring(0,10);
-      const iWithDate = {...i, registration_date: regDate};
-      return `<div class="form-grid" id="rform">
-        ${fi('vehicle_name','Vehicle Name',iWithDate)}${fi('plate_number','Plate Number',iWithDate)}
-        ${fi('department','Department',iWithDate)}${fi('mv_file_no','MV File No',iWithDate)}
-        ${fi('registration_month','Registration Month',iWithDate)}
-        ${fi('registration_date','Registration Date',iWithDate,'date')}
-        ${fta('remarks','Remarks',iWithDate)}
-        <div class="form-actions form-full">
-          <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
-          <button class="btn btn-primary" onclick="saveRecord()">💾 Save</button>
-        </div>
-      </div>`;
+    let ltoAttentionHtml='';
+    if(ltoExp.length){
+      ltoAttentionHtml+=`<div class="alert-section-label red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Expired (${ltoExp.length})</div>`;
+      ltoAttentionHtml+=ltoExp.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
+    }
+    if(ltoWarn.length){
+      ltoAttentionHtml+=`<div class="alert-section-label amber">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        Due Soon (${ltoWarn.length})</div>`;
+      ltoAttentionHtml+=ltoWarn.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
+    }
+    if(!ltoExp.length&&!ltoWarn.length){
+      ltoAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry registrations</p></div>`;
     }
 
-    async function saveRecord(){
-      if(!isOnline){toast('You are offline. Cannot save changes.','error');return;}
-      const data={};
-      document.querySelectorAll('#rform [name]').forEach(el=>data[el.name]=el.value);
-      if(S.editId){
-        // When editing: preserve existing values for fields the user left blank,
-        // EXCEPT date fields — if a date field is blank the user intentionally cleared it
-        const existing=S.records.find(x=>x.id===S.editId)||{};
-        const clearableFields=['registration_date','insurance_date_from','insurance_date_to','remarks'];
-        Object.keys(data).forEach(k=>{
-          if(data[k]===''||data[k]===null){
-            if(clearableFields.includes(k)){
-              data[k]=null;
-            } else {
-              data[k]=existing[k]??null;
-            }
-          }
-        });
-      } else {
-        Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null;});
-      }
-      try{
-        if(S.editId){
-          await updateRec(S.editId,data);
-          const idx=S.records.findIndex(x=>x.id===S.editId);
-          if(idx>=0)S.records[idx]={...S.records[idx],...data};
-          toast('Updated successfully!','success');
-        } else {
-          const ref=await addRec(data);
-          S.records.push({id:ref.id,...data});
-          toast('Added successfully!','success');
-        }
-        closeModal('modal-form');
-        refreshCurrent();
-      }catch(e){toast('Error: '+e.message,'error');}
-    }
-    window.saveRecord=saveRecord;
+    const upcomingLabel = `<div class="alert-section-label muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Upcoming Renewals</div>`;
+    const insUpcomingHtml = insUpcoming.length ? upcomingLabel+insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('') : '';
+    const ltoUpcomingHtml = ltoUpcoming.length ? upcomingLabel+ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('') : '';
 
-    async function confirmDelete(id){
-      if(!isOnline){toast('You are offline. Cannot delete records.','error');return;}
-      if(!confirm('Delete this record? This cannot be undone.'))return;
-      try{
-        await deleteRec(id);
-        S.records=S.records.filter(x=>x.id!==id);
-        toast('Deleted!','success');
-        closeModal('modal-record');
-        refreshCurrent();
-      }catch(e){toast('Error: '+e.message,'error');}
-    }
-    window.confirmDelete=confirmDelete;
+    document.getElementById('ins-attention-slot').innerHTML=insAttentionHtml;
+    document.getElementById('ins-upcoming-slot').innerHTML=insUpcomingHtml;
+    document.getElementById('lto-attention-slot').innerHTML=ltoAttentionHtml;
+    document.getElementById('lto-upcoming-slot').innerHTML=ltoUpcomingHtml;
 
-    // ── INIT ──
-    loadDashboard();
-  } catch(e){
-    document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d1117;color:#f85149;font-family:sans-serif;text-align:center;padding:20px;"><div><div style="font-size:48px;margin-bottom:16px">⚠️</div><div style="font-size:18px;margin-bottom:8px;">Firebase Connection Failed</div><div style="font-size:13px;color:#8b949e;">Check credentials in index.html.<br>${e.message}</div></div></div>`;
+    window._dashData={ insExp, insWarn, insOk:insOk.slice().sort((a,b)=>a._is.days-b._is.days), ltoExp, ltoWarn, ltoOk:ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days) };
   }
+
+  // ── Stat listbox toggle ──
+  function toggleStatList(col, type){
+    const lb=document.getElementById(`${col}-listbox`);
+    const cards={expired:`${col}-card-expired`,warning:`${col}-card-warning`,ok:`${col}-card-ok`};
+    const colorMap={expired:'active-red',warning:'active-amber',ok:'active-green'};
+    const data=window._dashData||{};
+    const isMode=col==='ins';
+    const lists=isMode?{expired:data.insExp||[],warning:data.insWarn||[],ok:data.insOk||[]}:{expired:data.ltoExp||[],warning:data.ltoWarn||[],ok:data.ltoOk||[]};
+    const labels={expired:'Expired',warning:'Due Soon',ok:'Active'};
+
+    const alreadyOpen=lb.classList.contains('open')&&lb.dataset.type===type;
+    Object.values(cards).forEach(id=>{const el=document.getElementById(id);if(el)el.className='dash-stat-card';});
+    lb.classList.remove('open');
+    if(alreadyOpen)return;
+
+    const activeCard=document.getElementById(cards[type]);
+    if(activeCard)activeCard.classList.add(colorMap[type]);
+    lb.dataset.type=type;
+
+    const items=lists[type]||[];
+    if(!items.length){lb.classList.remove('open');return;}
+
+    const dayColors={expired:'var(--red)',warning:'var(--amber)',ok:'var(--emerald)'};
+    const rows=items.map(i=>{
+      const s=isMode?i._is:i._ls;
+      const daysLabel=s.type==='expired'?`Expired ${s.days}d ago`:s.days===0?'Due Today':`Due in ${s.days}d`;
+      const meta=isMode?(i.insurance_date_from||i.insurance_date_to?`${fmtDate(i.insurance_date_from)||'?'} → ${fmtDate(i.insurance_date_to)||'?'}`:(i.insurance_date||i.insurance_month||'')):(`Reg: ${fmtDate(i.registration_date)}`);
+      const recMode=isMode?'insurance':'lto';
+      return `<div class="stat-list-row" onclick="showRecordModal('${i.id}','${recMode}')">
+        <div class="stat-list-left">
+          <div class="stat-list-name">${i.vehicle_name||'-'} <span>${i.plate_number||''}</span></div>
+          <div class="stat-list-meta">${i.department||''} · ${meta}</div>
+        </div>
+        <div class="stat-list-days" style="color:${dayColors[type]}">${daysLabel}</div>
+      </div>`;
+    }).join('');
+
+    lb.innerHTML=`<div class="stat-listbox-head">
+      <span>${labels[type]} — ${items.length} record${items.length!==1?'s':''}</span>
+      <button class="stat-listbox-close" onclick="toggleStatList('${col}','${type}')">✕</button>
+    </div>
+    <div class="stat-listbox-inner">${rows}</div>`;
+    lb.classList.add('open');
+  }
+  window.toggleStatList=toggleStatList;
+
+  function updateBadges(){
+    document.getElementById('badge-insurance').textContent=S.records.length;
+    const ltoCount=S.records.filter(i=>i.registration_date||i.registration_month).length;
+    document.getElementById('badge-lto').textContent=ltoCount;
+  }
+
+  // ════════════════════════════════
+  // VIEW TOGGLE
+  // ════════════════════════════════
+  function setInsView(v){
+    S.insView=v;
+    document.getElementById('ins-view-table').classList.toggle('active',v==='table');
+    document.getElementById('ins-view-card').classList.toggle('active',v==='card');
+    document.getElementById('ins-table-area').style.display=v==='table'?'block':'none';
+    document.getElementById('ins-cards').style.display=v==='card'?'block':'none';
+    if(v==='card') renderInsCards(); else renderInsTable();
+  }
+  window.setInsView=setInsView;
+
+  function setLtoView(v){
+    S.ltoView=v;
+    document.getElementById('lto-view-table').classList.toggle('active',v==='table');
+    document.getElementById('lto-view-card').classList.toggle('active',v==='card');
+    document.getElementById('lto-table-area').style.display=v==='table'?'block':'none';
+    document.getElementById('lto-cards').style.display=v==='card'?'block':'none';
+    if(v==='card') renderLTOCards(); else renderLTOTable();
+  }
+  window.setLtoView=setLtoView;
+
+  // ════════════════════════════════
+  // INSURANCE PAGE
+  // ════════════════════════════════
+  async function loadInsurance(){
+    document.getElementById('ins-table-area').innerHTML=`<div class="loading-state"><div class="spinner"></div></div>`;
+    S.records=await getAll(); updateBadges();
+    document.getElementById('ins-count').textContent=`${S.records.length}`;
+    renderInsPills(); renderInsTable(); renderInsCards();
+  }
+
+  function renderInsPills(){
+    document.getElementById('ins-pills').innerHTML=MONTHS.map(m=>`
+      <div class="pill ${m===S.insFilter?'active':''}" onclick="setInsFilter('${m}')">${m==='All'?'All':m.slice(0,3)}</div>`).join('');
+  }
+  window.setInsFilter=m=>{S.insFilter=m;renderInsPills();renderInsTable();renderInsCards();};
+
+  function filteredIns(){
+    const q=S.insSearch.toLowerCase();
+    let list=S.records;
+    if(S.insFilter!=='All') list=list.filter(i=>(i.insurance_month||'').toUpperCase()===S.insFilter);
+    if(q) list=list.filter(i=>[i.vehicle_name,i.plate_number,i.department,i.mv_file_no,i.insurance_month,i.remarks].join(' ').toLowerCase().includes(q));
+    return list;
+  }
+
+  function filterInsurance(){
+    S.insSearch=(document.getElementById('ins-search').value||'').toLowerCase();
+    document.getElementById('ins-count').textContent=`${filteredIns().length}`;
+    renderInsTable(); renderInsCards();
+  }
+  window.filterInsurance=filterInsurance;
+
+  function renderInsTable(){
+    const list=filteredIns();
+    const el=document.getElementById('ins-table-area');
+    if(!list.length){
+      el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><p>No insurance records found</p></div>`;
+      return;
+    }
+    const svgCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:9px;height:9px"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const svgX     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:9px;height:9px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const svgWarn  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:9px;height:9px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
+    el.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>
+        <th>#</th><th>Vehicle</th>
+        <th class="hide-mobile">Department</th>
+        <th>Plate No.</th>
+        <th class="hide-mobile">Insurance Period</th>
+        <th class="hide-mobile">Expiry</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+        ${list.map(i=>{
+          const s=insStatus(getInsExpiry(i),14);
+          const b=s.type==='expired'?`<span class="badge badge-red">${svgX} Expired</span>`
+                 :s.type==='warning'?`<span class="badge badge-amber">${svgWarn} Due Soon</span>`
+                 :`<span class="badge badge-green">${svgCheck} Active</span>`;
+          return `<tr onclick="showRecordModal('${i.id}','insurance')">
+            <td class="td-num">${i.item_no||'—'}</td>
+            <td class="td-primary">${i.vehicle_name||'—'}</td>
+            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
+            <td class="td-mono">${i.plate_number||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${insDateRangeDisplay(i)||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${endDateDisplay(getInsExpiry(i))||'—'}</td>
+            <td>${b}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+  }
+
+  function renderInsCards(){
+    const list=filteredIns();
+    const svgShield=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+    const svgCal=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+    document.getElementById('ins-cards').innerHTML=list.map((i,idx)=>{
+      const s=insStatus(getInsExpiry(i),14);
+      const bText=s.type==='expired'?'Expired':s.type==='warning'?'Due Soon':'Active';
+      const bCls=s.type==='expired'?'badge-red':s.type==='warning'?'badge-amber':'badge-green';
+      return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*.03}s" onclick="showRecordModal('${i.id}','insurance')">
+        <div class="m-card-top">
+          <div class="m-card-name">${i.vehicle_name||'—'}</div>
+          <span class="badge badge-muted m-card-plate">${i.plate_number||'No Plate'}</span>
+        </div>
+        <div class="m-card-row">
+          ${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}
+          <span class="badge ${bCls}">${bText}</span>
+        </div>
+        <div class="m-card-detail">${svgShield} ${i.insurance_month||'—'}</div>
+        <div class="m-card-detail" style="margin-top:2px">${svgCal} ${insDateRangeDisplay(i)||'—'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ════════════════════════════════
+  // LTO PAGE
+  // ════════════════════════════════
+  async function loadLTO(){
+    document.getElementById('lto-table-area').innerHTML=`<div class="loading-state"><div class="spinner"></div></div>`;
+    S.records=await getAll(); updateBadges();
+    const ltoList=S.records.filter(i=>i.registration_date||i.registration_month);
+    document.getElementById('lto-count').textContent=`${ltoList.length}`;
+    renderLTOPills(); renderLTOTable(); renderLTOCards();
+  }
+
+  function renderLTOPills(){
+    document.getElementById('lto-pills').innerHTML=MONTHS.map(m=>`
+      <div class="pill ${m===S.ltoFilter?'active':''}" onclick="setLTOFilter('${m}')">${m==='All'?'All':m.slice(0,3)}</div>`).join('');
+  }
+  window.setLTOFilter=m=>{S.ltoFilter=m;renderLTOPills();renderLTOTable();renderLTOCards();};
+
+  function filteredLTO(){
+    const q=S.ltoSearch.toLowerCase();
+    let list=S.records.filter(i=>i.registration_date||i.registration_month);
+    if(S.ltoFilter!=='All') list=list.filter(i=>(i.registration_month||'').toUpperCase()===S.ltoFilter);
+    if(q) list=list.filter(i=>[i.vehicle_name,i.plate_number,i.department,i.mv_file_no,i.registration_month,i.remarks].join(' ').toLowerCase().includes(q));
+    return list;
+  }
+
+  function filterLTO(){
+    S.ltoSearch=(document.getElementById('lto-search').value||'').toLowerCase();
+    document.getElementById('lto-count').textContent=`${filteredLTO().length}`;
+    renderLTOTable(); renderLTOCards();
+  }
+  window.filterLTO=filterLTO;
+
+  function renderLTOTable(){
+    const list=filteredLTO();
+    const el=document.getElementById('lto-table-area');
+    if(!list.length){
+      el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><p>No LTO records found</p></div>`;
+      return;
+    }
+    const svgCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:9px;height:9px"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const svgX     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:9px;height:9px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const svgWarn  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:9px;height:9px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
+    const svgMiss  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:9px;height:9px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    el.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>
+        <th>#</th><th>Vehicle</th>
+        <th class="hide-mobile">Department</th>
+        <th>Plate No.</th>
+        <th class="hide-mobile">Reg. Month</th>
+        <th class="hide-mobile">Reg. Date</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+        ${list.map(i=>{
+          const s=i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
+          const b=s.type==='expired'?`<span class="badge badge-red">${svgX} Expired</span>`
+                 :s.type==='warning'?`<span class="badge badge-amber">${svgWarn} Due Soon</span>`
+                 :s.type==='missing'?`<span class="badge badge-muted">${svgMiss} No Date</span>`
+                 :`<span class="badge badge-green">${svgCheck} Active</span>`;
+          const dateCell=i.registration_date?fmtDate(i.registration_date):`<span style="color:var(--amber);font-size:10px">— missing —</span>`;
+          return `<tr onclick="showRecordModal('${i.id}','lto')" style="${s.type==='missing'?'background:rgba(245,158,11,.02)':''}">
+            <td class="td-num">${i.item_no||'—'}</td>
+            <td class="td-primary">${i.vehicle_name||'—'}</td>
+            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
+            <td class="td-mono">${i.plate_number||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${i.registration_month||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${dateCell}</td>
+            <td>${b}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+  }
+
+  function renderLTOCards(){
+    const list=filteredLTO();
+    const svgCal=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+    document.getElementById('lto-cards').innerHTML=list.map((i,idx)=>{
+      const s=i.registration_date?insStatus(i.registration_date,7):{type:'missing',days:null};
+      const bText=s.type==='expired'?'Expired':s.type==='warning'?'Due Soon':s.type==='missing'?'No Date':'Active';
+      const bCls=s.type==='expired'?'badge-red':s.type==='warning'?'badge-amber':s.type==='missing'?'badge-muted':'badge-green';
+      return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*.03}s" onclick="showRecordModal('${i.id}','lto')">
+        <div class="m-card-top">
+          <div class="m-card-name">${i.vehicle_name||'—'}</div>
+          <span class="badge badge-muted m-card-plate">${i.plate_number||'No Plate'}</span>
+        </div>
+        <div class="m-card-row">
+          ${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}
+          <span class="badge ${bCls}">${bText}</span>
+        </div>
+        <div class="m-card-detail">${svgCal} ${i.registration_date?fmtDate(i.registration_date):'<span style="color:var(--amber)">Date missing — tap to fix</span>'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ════════════════════════════════
+  // RECORD DETAIL MODAL
+  // ════════════════════════════════
+  function showRecordModal(id, mode){
+    const i=S.records.find(x=>x.id===id); if(!i) return;
+    document.getElementById('rec-title').textContent=i.vehicle_name||'Record';
+
+    // Update modal icon
+    const iconEl=document.getElementById('rec-modal-icon');
+    if(mode==='lto'){
+      iconEl.className='modal-icon lto';
+      iconEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>`;
+    } else {
+      iconEl.className='modal-icon ins';
+      iconEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+    }
+
+    if(mode==='insurance'){
+      const st=insStatus(getInsExpiry(i),14);
+      const sb=statusBadge(st.type,st.days);
+      document.getElementById('rec-body').innerHTML=`
+        <div class="v-hero">
+          <div class="v-hero-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="v-hero-right">
+            <div class="v-hero-name">${i.vehicle_name||'—'}</div>
+            <div class="v-hero-badges">
+              <span class="badge badge-muted" style="font-family:var(--mono)">${i.plate_number||'No Plate'}</span>
+              ${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}
+              ${sb}
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Insurance Details
+          </div>
+          ${dr('Item No.',i.item_no)}
+          ${dr('MV File No.',i.mv_file_no,'mono')}
+          ${dr('Insurance Month',i.insurance_month)}
+          ${dr('From',i.insurance_date_from?fmtDate(i.insurance_date_from):(i.insurance_date||null))}
+          ${dr('Expiry Date',i.insurance_date_to?fmtDate(i.insurance_date_to):endDateDisplay(i.insurance_date))}
+          ${dr('Remarks',i.remarks)}
+        </div>
+        <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:8px">
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <button class="btn btn-default btn-sm" onclick="openEditModal('${id}','insurance')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Record
+          </button>
+        </div>`;
+    } else {
+      const st=insStatus(i.registration_date,7);
+      const sb=statusBadge(st.type===undefined||(!i.registration_date)?'unknown':st.type, st.days);
+      document.getElementById('rec-body').innerHTML=`
+        <div class="v-hero">
+          <div class="v-hero-icon-wrap lto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </div>
+          <div class="v-hero-right">
+            <div class="v-hero-name">${i.vehicle_name||'—'}</div>
+            <div class="v-hero-badges">
+              <span class="badge badge-muted" style="font-family:var(--mono)">${i.plate_number||'No Plate'}</span>
+              ${i.department?`<span class="badge badge-blue">${i.department}</span>`:''}
+              ${sb}
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            LTO Registration Details
+          </div>
+          ${dr('Item No.',i.item_no)}
+          ${dr('MV File No.',i.mv_file_no,'mono')}
+          ${dr('Registration Month',i.registration_month)}
+          ${dr('Registration Date',fmtDate(i.registration_date)||'<span style="color:var(--amber);font-size:11px">Not set — click Edit to add</span>')}
+          ${dr('Remarks',i.remarks)}
+        </div>
+        <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:8px">
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <button class="btn btn-default btn-sm" onclick="openEditModal('${id}','lto')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Record
+          </button>
+        </div>`;
+    }
+    openModal('modal-record');
+  }
+  window.showRecordModal=showRecordModal;
+
+  // ════════════════════════════════
+  // ADD / EDIT FORMS
+  // ════════════════════════════════
+  function openAddModal(){
+    S.editId=null;
+    const mode=S.page==='lto'?'lto':'insurance';
+    S.editMode=mode;
+    document.getElementById('form-title').textContent=mode==='lto'?'Add LTO Registration':'Add Insurance Record';
+    document.getElementById('form-body').innerHTML=mode==='lto'?ltoForm():iForm();
+    openModal('modal-form');
+  }
+  window.openAddModal=openAddModal;
+
+  function openEditModal(id,mode){
+    S.editId=id; S.editMode=mode;
+    closeModal('modal-record');
+    const i=S.records.find(x=>x.id===id);
+    document.getElementById('form-title').textContent=mode==='lto'?'Edit LTO Registration':'Edit Insurance Record';
+    document.getElementById('form-body').innerHTML=mode==='lto'?ltoForm(i):iForm(i);
+    openModal('modal-form');
+  }
+  window.openEditModal=openEditModal;
+
+  function fi(name,label,v={},type='text'){
+    return `<div class="form-group"><label>${label}</label><input class="form-input" type="${type}" name="${name}" value="${ea(v[name]||'')}" placeholder="${label}"></div>`;
+  }
+  function fta(name,label,v={}){
+    return `<div class="form-group form-full"><label>${label}</label><textarea class="form-textarea" name="${name}" placeholder="${label}">${eh(v[name]||'')}</textarea></div>`;
+  }
+
+  function iForm(i={}){
+    let fromVal=i.insurance_date_from||'';
+    let toVal=i.insurance_date_to||'';
+    if((!fromVal||!toVal)&&i.insurance_date){
+      const leg=splitLegacyInsDate(i.insurance_date);
+      if(!fromVal)fromVal=leg.from;
+      if(!toVal)toVal=leg.to;
+    }
+    return `<div class="form-grid" id="rform">
+      ${fi('vehicle_name','Vehicle Name',i)}
+      ${fi('plate_number','Plate Number',i)}
+      ${fi('department','Department',i)}
+      ${fi('mv_file_no','MV File No.',i)}
+      ${fi('insurance_month','Insurance Month',i)}
+      <div class="form-group form-full">
+        <label>Insurance Period (From → Expiry)</label>
+        <div class="form-date-row">
+          <input class="form-input" type="date" name="insurance_date_from" value="${ea(fromVal)}">
+          <div class="form-date-arrow">→</div>
+          <input class="form-input" type="date" name="insurance_date_to" value="${ea(toVal)}">
+        </div>
+      </div>
+      ${fta('remarks','Remarks',i)}
+      <div class="form-actions">
+        <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Record
+        </button>
+      </div>
+    </div>`;
+  }
+
+  function ltoForm(i={}){
+    let regDate=i.registration_date||'';
+    if(regDate&&regDate.includes('T'))regDate=regDate.substring(0,10);
+    if(regDate&&regDate.includes(' '))regDate=regDate.substring(0,10);
+    const iv={...i,registration_date:regDate};
+    return `<div class="form-grid" id="rform">
+      ${fi('vehicle_name','Vehicle Name',iv)}
+      ${fi('plate_number','Plate Number',iv)}
+      ${fi('department','Department',iv)}
+      ${fi('mv_file_no','MV File No.',iv)}
+      ${fi('registration_month','Registration Month',iv)}
+      ${fi('registration_date','Registration Date',iv,'date')}
+      ${fta('remarks','Remarks',iv)}
+      <div class="form-actions">
+        <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Record
+        </button>
+      </div>
+    </div>`;
+  }
+
+  async function saveRecord(){
+    if(!isOnline){toast('You are offline. Cannot save changes.','error');return;}
+    const data={};
+    document.querySelectorAll('#rform [name]').forEach(el=>data[el.name]=el.value);
+    if(S.editId){
+      const existing=S.records.find(x=>x.id===S.editId)||{};
+      const clearableFields=['registration_date','insurance_date_from','insurance_date_to','remarks'];
+      Object.keys(data).forEach(k=>{
+        if(data[k]===''||data[k]===null){
+          if(clearableFields.includes(k)){data[k]=null;}
+          else{data[k]=existing[k]??null;}
+        }
+      });
+    } else {
+      Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null;});
+    }
+    try{
+      if(S.editId){
+        await updateRec(S.editId,data);
+        const idx=S.records.findIndex(x=>x.id===S.editId);
+        if(idx>=0)S.records[idx]={...S.records[idx],...data};
+        toast('Record updated successfully!','success');
+      } else {
+        const ref=await addRec(data);
+        S.records.push({id:ref.id,...data});
+        toast('Record added successfully!','success');
+      }
+      closeModal('modal-form');
+      refreshCurrent();
+    }catch(e){toast('Error: '+e.message,'error');}
+  }
+  window.saveRecord=saveRecord;
+
+  async function confirmDelete(id){
+    if(!isOnline){toast('You are offline. Cannot delete records.','error');return;}
+    if(!confirm('Delete this record? This action cannot be undone.'))return;
+    try{
+      await deleteRec(id);
+      S.records=S.records.filter(x=>x.id!==id);
+      toast('Record deleted.','success');
+      closeModal('modal-record');
+      refreshCurrent();
+    }catch(e){toast('Error: '+e.message,'error');}
+  }
+  window.confirmDelete=confirmDelete;
+
+  // Start
+  loadDashboard();
+
+} catch(e){
+  document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#060D1A;color:#EF4444;font-family:sans-serif;text-align:center;padding:20px;">
+    <div>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Firebase Connection Failed</div>
+      <div style="font-size:12px;color:#8FA5BF">Check credentials in index.html.<br>${e.message}</div>
+    </div>
+  </div>`;
+}
 })();
 </script>
 
 <script>
+/* ── Shared modal helpers (non-module) ── */
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function closeOverlay(e,id){if(e.target.id===id)closeModal(id);}
-window.openModal=openModal;window.closeModal=closeModal;window.closeOverlay=closeOverlay;
-function fmtDate(d){if(!d||d==='null')return '';const s=String(d);if(s.includes('00:00:00')||s.includes('T')){const dt=new Date(s);if(isNaN(dt))return s.substring(0,10);return dt.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});}return s.substring(0,10);}
-function dr(label,val,cls=''){if(!val||val==='null'||val==='undefined'||String(val).trim()==='')return '';return `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value ${cls?'detail-'+cls:''}">${val}</span></div>`;}
+window.openModal=openModal; window.closeModal=closeModal; window.closeOverlay=closeOverlay;
+
+function fmtDate(d){
+  if(!d||d==='null')return '';
+  const s=String(d);
+  if(s.includes('00:00:00')||s.includes('T')){
+    const dt=new Date(s);
+    if(isNaN(dt))return s.substring(0,10);
+    return dt.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});
+  }
+  return s.substring(0,10);
+}
+function dr(label,val,cls=''){
+  if(!val||val==='null'||val==='undefined'||String(val).trim()==='')return '';
+  return `<div class="detail-row">
+    <span class="detail-label">${label}</span>
+    <span class="detail-value${cls?' detail-'+cls:''}">${val}</span>
+  </div>`;
+}
 function ea(s){return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function eh(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-let toastTimer;
-function toast(msg,type='success'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000);}
 window.fmtDate=fmtDate;
+
+let toastTimer;
+function toast(msg,type='success'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className=`toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
+}
+window.toast=toast;
+
+/* Close modals with Escape key */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['modal-record','modal-form'].forEach(id=>{
+      const m=document.getElementById(id);
+      if(m&&m.classList.contains('open'))closeModal(id);
+    });
+  }
+});
 </script>
 </body>
 </html>
