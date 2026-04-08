@@ -1219,7 +1219,7 @@ td { padding:11px 14px; color:var(--text2); }
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
-      <span class="modal-title">Import Building Insurance</span>
+      <span class="modal-title">Import Data</span>
       <button class="modal-close" onclick="closeModal('modal-import')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -1234,7 +1234,7 @@ td { padding:11px 14px; color:var(--text2); }
           <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/>
         </svg>
         <strong id="import-drop-label">Click or drop XLSX file here</strong>
-        <p>Expected columns: NAME OF BUILDINGS, PERIOD COVERAGE</p>
+        <p id="import-columns-hint">Select a file to import data</p>
       </div>
       <div id="import-preview-area" style="display:none">
         <div class="import-preview" id="import-preview"></div>
@@ -2387,9 +2387,10 @@ try {
   window.confirmDelete=confirmDelete;
 
   // ════════════════════════════════
-  // XLSX IMPORTER — BUILDING INSURANCE
+  // XLSX IMPORTER — GENERIC DATA
   // ════════════════════════════════
   let _importRows=[];
+  let _importColumns=[];
 
   function openImportModal(){
     resetImport();
@@ -2399,11 +2400,10 @@ try {
 
   function resetImport(){
     _importRows=[];
+    _importColumns=[];
     document.getElementById('import-drop-label').textContent='Click or drop XLSX file here';
+    document.getElementById('import-columns-hint').textContent='Select a file to import data';
     document.getElementById('import-preview-area').style.display='none';
-    document.getElementById('import-preview').innerHTML='';
-    const fi=document.getElementById('import-file-input');
-    if(fi) fi.value='';
   }
   window.resetImport=resetImport;
 
@@ -2432,12 +2432,23 @@ try {
         const wb=XLSX.read(data,{type:'array'});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-        _importRows=rows.map(r=>{
-          const name=r['NAME OF BUILDINGS']||r['Building Name']||r['name']||'';
-          const period=r['PERIOD COVERAGE']||r['Period Coverage']||r['period']||'';
-          const parsed=parsePeriodCoverage(String(period));
-          return {building_name:String(name).trim(),coverage_raw:String(period).trim(),coverage_from:parsed.from,coverage_to:parsed.to,remarks:''};
-        }).filter(r=>r.building_name);
+        
+        // Auto-detect available columns from the spreadsheet
+        _importColumns=rows.length>0?Object.keys(rows[0]):[];
+        
+        // Update hint text with detected columns
+        const hint=document.getElementById('import-columns-hint');
+        if(_importColumns.length>0){
+          hint.textContent=`Detected columns: ${_importColumns.join(', ')}`;
+        }
+        
+        // Generic import: preserve all columns as-is
+        _importRows=rows.filter(r=>Object.values(r).some(v=>v&&String(v).trim()));
+        
+        if(_importRows.length===0){
+          toast('No valid data rows found','error');
+          return;
+        }
         showImportPreview();
       }catch(err){toast('Error reading XLSX: '+err.message,'error');}
     };
@@ -2447,7 +2458,17 @@ try {
 
   function showImportPreview(){
     const previewRows=_importRows.slice(0,10);
-    const moreStr=_importRows.length>10?`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
+    const moreStr=_importRows.length>10?`<tr><td colspan="${_importColumns.length+1}" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
+    
+    // Build dynamic headers
+    const headerCells=_importColumns.map(col=>`<th>${col}</th>`).join('');
+    
+    // Build dynamic rows
+    const bodyCells=previewRows.map((r,idx)=>{
+      const cells=_importColumns.map(col=>`<td>${String(r[col]||'').substring(0,50)}</td>`).join('');
+      return `<tr><td>${idx+1}</td>${cells}</tr>`;
+    }).join('');
+    
     document.getElementById('import-preview').innerHTML=`
       <div class="import-preview-head">
         <span>Preview</span>
@@ -2455,9 +2476,9 @@ try {
       </div>
       <div class="import-preview-scroll">
         <table>
-          <thead><tr><th>#</th><th>Building Name</th><th>Coverage From</th><th>Coverage To</th></tr></thead>
+          <thead><tr><th>#</th>${headerCells}</tr></thead>
           <tbody>
-            ${previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`).join('')}
+            ${bodyCells}
             ${moreStr}
           </tbody>
         </table>
@@ -2473,7 +2494,7 @@ try {
     const btn=document.getElementById('import-confirm-btn');
     btn.disabled=true; btn.textContent='Importing…';
     try{
-      // If overwrite: delete all existing building_insurance docs first
+      // If overwrite: delete all existing docs first
       if(!append){
         const snap=await getDocs(bldgCol());
         const batch=writeBatch(db);
@@ -2487,11 +2508,13 @@ try {
         const batch=writeBatch(db);
         chunk.forEach(row=>{
           const ref=doc(bldgCol());
-          batch.set(ref,{...row,imported_at:new Date().toISOString()});
+          // Add import metadata
+          const data={...row,imported_at:new Date().toISOString()};
+          batch.set(ref,data);
         });
         await batch.commit();
       }
-      toast(`Imported ${_importRows.length} building records!`,'success');
+      toast(`Imported ${_importRows.length} records!`,'success');
       closeModal('modal-import');
       resetImport();
     }catch(err){
