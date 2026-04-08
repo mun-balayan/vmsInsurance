@@ -1296,7 +1296,7 @@ try {
       txt.textContent='Connected';
       ban.classList.remove('show');
       if(addBtn) addBtn.style.display=(S.page==='dashboard')?'none':'';
-      if(impBtn) impBtn.style.display=(S.page==='dashboard')?'none':'';
+      if(impBtn) impBtn.style.display='';
     } else {
       dot.style.background='var(--amber)';
       dot.style.boxShadow='0 0 8px rgba(245,158,11,.6)';
@@ -1313,7 +1313,6 @@ try {
   // ── State ──
   const S = {
     page:'dashboard', records:[], editId:null, editMode:'insurance',
-    importMode:'vehicle',
     insFilter:'All', ltoFilter:'All',
     insSearch:'', ltoSearch:'',
     insView:'table', ltoView:'table',
@@ -1343,9 +1342,7 @@ try {
     document.getElementById('topbar-title').textContent=titles[pg]||pg;
     // Hide add button on dashboard only
     const addBtn=document.getElementById('topbar-add-btn');
-    if(addBtn && isOnline) addBtn.style.display=(pg==='dashboard')?'none':'';
-    const impBtn=document.getElementById('topbar-import-btn');
-    if(impBtn && isOnline) impBtn.style.display=(pg==='dashboard')?'none':'';
+    if(addBtn) addBtn.style.display=(pg==='dashboard')?'none':'';
     closeSidebar();
     if(pg==='dashboard') loadDashboard();
     else if(pg==='insurance') loadInsurance();
@@ -2390,24 +2387,12 @@ try {
   window.confirmDelete=confirmDelete;
 
   // ════════════════════════════════
-  // XLSX IMPORTER (GENERALIZED)
+  // XLSX IMPORTER — BUILDING INSURANCE
   // ════════════════════════════════
   let _importRows=[];
 
   function openImportModal(){
     resetImport();
-    
-    // Determine context based on the active page
-    S.importMode = S.page === 'building' ? 'building' : 'vehicle';
-    const isBldg = S.importMode === 'building';
-
-    // Update modal UI dynamically
-    document.querySelector('#modal-import .modal-title').textContent = isBldg ? 'Import Building Insurance' : 'Import Vehicle Records';
-    document.querySelector('#modal-import .modal-icon').className = isBldg ? 'modal-icon bldg' : 'modal-icon ins';
-    document.querySelector('#import-drop-zone p').textContent = isBldg
-      ? 'Expected columns: NAME OF BUILDINGS, PERIOD COVERAGE, REMARKS'
-      : 'Expected columns: VEHICLE NAME, PLATE NUMBER, DEPARTMENT, MV FILE NO, INSURANCE MONTH, INSURANCE DATE, REGISTRATION MONTH, REGISTRATION DATE, REMARKS';
-
     openModal('modal-import');
   }
   window.openImportModal=openImportModal;
@@ -2422,15 +2407,17 @@ try {
   }
   window.resetImport=resetImport;
 
-  // Parse period string e.g. "10/01/2025 - 10/01/2026"
+  // Parse period string e.g. "10/01/2025 - 10/01/2026" or "05/23/2025 - 5/23/2026"
   function parsePeriodCoverage(str){
     if(!str) return {from:'',to:''};
     const s=String(str).trim();
+    // Try slash-dash: MM/DD/YYYY - MM/DD/YYYY
     const m=s.match(/(\d{1,2}\/\d{1,2}\/\d{4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
     if(m){
       const df=new Date(m[1]), dt=new Date(m[2]);
       if(!isNaN(df)&&!isNaN(dt)) return {from:toInputDate(df),to:toInputDate(dt)};
     }
+    // Fallback: use splitLegacyInsDate
     const leg=splitLegacyInsDate(s);
     return {from:leg.from,to:leg.to};
   }
@@ -2445,39 +2432,12 @@ try {
         const wb=XLSX.read(data,{type:'array'});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-
-        if(S.importMode === 'building'){
-          _importRows=rows.map(r=>{
-            const name=r['NAME OF BUILDINGS']||r['Building Name']||r['name']||'';
-            const period=r['PERIOD COVERAGE']||r['Period Coverage']||r['period']||'';
-            const remarks=r['REMARKS']||r['Remarks']||r['remarks']||'';
-            const parsed=parsePeriodCoverage(String(period));
-            return {building_name:String(name).trim(),coverage_raw:String(period).trim(),coverage_from:parsed.from,coverage_to:parsed.to,remarks:String(remarks).trim()};
-          }).filter(r=>r.building_name);
-        } else {
-          // Unified Vehicle Import (handles both Insurance & LTO columns)
-          _importRows=rows.map(r=>{
-            const legIns = splitLegacyInsDate(r['INSURANCE DATE']||r['Insurance Date']||r['insurance_date']||'');
-            const rawReg = String(r['REGISTRATION DATE']||r['Registration Date']||r['registration_date']||'').trim();
-            let regDate = null;
-            if(rawReg){
-              const d = safeParse(rawReg);
-              if(d) regDate = toInputDate(d);
-            }
-            return {
-              vehicle_name: String(r['VEHICLE NAME']||r['Vehicle Name']||r['vehicle_name']||'').trim(),
-              plate_number: String(r['PLATE NUMBER']||r['Plate Number']||r['plate_number']||'').trim(),
-              department: String(r['DEPARTMENT']||r['Department']||r['department']||'').trim(),
-              mv_file_no: String(r['MV FILE NO']||r['MV File No.']||r['mv_file_no']||'').trim(),
-              insurance_month: String(r['INSURANCE MONTH']||r['Insurance Month']||r['insurance_month']||'').trim(),
-              insurance_date_from: legIns.from,
-              insurance_date_to: legIns.to,
-              registration_month: String(r['REGISTRATION MONTH']||r['Registration Month']||r['registration_month']||'').trim(),
-              registration_date: regDate,
-              remarks: String(r['REMARKS']||r['Remarks']||r['remarks']||'').trim()
-            };
-          }).filter(r=>r.vehicle_name);
-        }
+        _importRows=rows.map(r=>{
+          const name=r['NAME OF BUILDINGS']||r['Building Name']||r['name']||'';
+          const period=r['PERIOD COVERAGE']||r['Period Coverage']||r['period']||'';
+          const parsed=parsePeriodCoverage(String(period));
+          return {building_name:String(name).trim(),coverage_raw:String(period).trim(),coverage_from:parsed.from,coverage_to:parsed.to,remarks:''};
+        }).filter(r=>r.building_name);
         showImportPreview();
       }catch(err){toast('Error reading XLSX: '+err.message,'error');}
     };
@@ -2487,17 +2447,7 @@ try {
 
   function showImportPreview(){
     const previewRows=_importRows.slice(0,10);
-    const moreStr=_importRows.length>10?`<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
-    let headHtml, bodyHtml;
-
-    if(S.importMode === 'building'){
-      headHtml = `<th>#</th><th>Building Name</th><th>Coverage From</th><th>Coverage To</th>`;
-      bodyHtml = previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`).join('');
-    } else {
-      headHtml = `<th>#</th><th>Vehicle</th><th>Plate</th><th>Dept</th><th>Ins. Month</th><th>Reg. Month</th>`;
-      bodyHtml = previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.vehicle_name}</td><td>${r.plate_number||'—'}</td><td>${r.department||'—'}</td><td>${r.insurance_month||'—'}</td><td>${r.registration_month||'—'}</td></tr>`).join('');
-    }
-
+    const moreStr=_importRows.length>10?`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
     document.getElementById('import-preview').innerHTML=`
       <div class="import-preview-head">
         <span>Preview</span>
@@ -2505,9 +2455,9 @@ try {
       </div>
       <div class="import-preview-scroll">
         <table>
-          <thead><tr>${headHtml}</tr></thead>
+          <thead><tr><th>#</th><th>Building Name</th><th>Coverage From</th><th>Coverage To</th></tr></thead>
           <tbody>
-            ${bodyHtml}
+            ${previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`).join('')}
             ${moreStr}
           </tbody>
         </table>
@@ -2523,30 +2473,27 @@ try {
     const btn=document.getElementById('import-confirm-btn');
     btn.disabled=true; btn.textContent='Importing…';
     try{
-      // Target correct collection based on mode
-      const targetCol = S.importMode === 'building' ? bldgCol() : col();
-
+      // If overwrite: delete all existing building_insurance docs first
       if(!append){
-        const snap=await getDocs(targetCol);
+        const snap=await getDocs(bldgCol());
         const batch=writeBatch(db);
         snap.docs.forEach(d=>batch.delete(d.ref));
         await batch.commit();
       }
-      
+      // Batch write new records (Firestore allows max 500 per batch)
       const chunkSize=490;
       for(let c=0;c<_importRows.length;c+=chunkSize){
         const chunk=_importRows.slice(c,c+chunkSize);
         const batch=writeBatch(db);
         chunk.forEach(row=>{
-          const ref=doc(targetCol);
+          const ref=doc(bldgCol());
           batch.set(ref,{...row,imported_at:new Date().toISOString()});
         });
         await batch.commit();
       }
-      toast(`Imported ${_importRows.length} records!`,'success');
+      toast(`Imported ${_importRows.length} building records!`,'success');
       closeModal('modal-import');
       resetImport();
-      if(S.importMode === 'vehicle') refreshCurrent(); // Force UI refresh for vehicle tables
     }catch(err){
       toast('Import failed: '+err.message,'error');
       btn.disabled=false; btn.textContent='Import to Firestore';
