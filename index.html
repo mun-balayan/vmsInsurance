@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VMS Insurance">
+  <meta name="viewport" content="width=1280, initial-scale=1.0">
 <meta name="description" content="Vehicle Insurance & LTO Registration Monitoring — Municipality of Balayan">
 <meta name="theme-color" content="#060D1A">
 <link rel="icon" type="image/png" href="./logo.png">
@@ -520,24 +517,7 @@ td { padding:11px 14px; color:var(--text2); }
 .td-num  { color:var(--text3); font-family:var(--mono); }
 .td-empty { text-align:center; padding:40px; }
 
-/* ══════════════════════════════════════════
-   CARDS (MOBILE VIEW)
-══════════════════════════════════════════ */
-#ins-cards, #lto-cards { display:none; }
-.m-card {
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:var(--rl); padding:14px; margin-bottom:10px;
-  cursor:pointer; transition:all .15s;
-  animation:slideIn .2s ease both;
-}
-.m-card:hover { border-color:rgba(255,255,255,.12); transform:translateY(-1px); box-shadow:var(--sh); }
-.m-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px; }
-.m-card-name { font-size:13.5px; font-weight:700; color:var(--text); }
-.m-card-plate { font-family:var(--mono); font-size:10px; }
-.m-card-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
-.m-card-detail { font-size:10px; color:var(--text3); display:flex; align-items:center; gap:4px; }
-.m-card-detail svg { width:11px; height:11px; }
-@keyframes slideIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+/* Mobile card views removed - desktop only */
 
 /* ══════════════════════════════════════════
    BADGES
@@ -869,9 +849,7 @@ td { padding:11px 14px; color:var(--text2); }
 /* ══════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════ */
-@media (max-width: 1200px) {
-  .dash-grid { grid-template-columns:1fr 1fr; }
-}
+/* Mobile support removed - desktop only */
 @media (max-width: 900px) {
   :root { --sidebar-w:280px; }
   #sidebar {
@@ -1802,10 +1780,10 @@ try {
     el.innerHTML=`<div class="table-wrap"><table>
       <thead><tr>
         <th>#</th><th>Vehicle</th>
-        <th class="hide-mobile">Department</th>
+          <th>Department</th>
         <th>Plate No.</th>
-        <th class="hide-mobile">Insurance Period</th>
-        <th class="hide-mobile">Expiry</th>
+          <th>Insurance Period</th>
+          <th>Expiry</th>
         <th>Status</th>
       </tr></thead>
       <tbody>
@@ -1817,10 +1795,10 @@ try {
           return `<tr onclick="showRecordModal('${i.id}','insurance')">
             <td class="td-num">${i.item_no||'—'}</td>
             <td class="td-primary">${i.vehicle_name||'—'}</td>
-            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
+                      <td>${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
             <td class="td-mono">${i.plate_number||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${insDateRangeDisplay(i)||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${endDateDisplay(getInsExpiry(i))||'—'}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${insDateRangeDisplay(i)||'—'}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${endDateDisplay(getInsExpiry(i))||'—'}</td>
             <td>${b}</td>
           </tr>`;
         }).join('')}
@@ -1896,10 +1874,10 @@ try {
     el.innerHTML=`<div class="table-wrap"><table>
       <thead><tr>
         <th>#</th><th>Vehicle</th>
-        <th class="hide-mobile">Department</th>
+          <th>Department</th>
         <th>Plate No.</th>
-        <th class="hide-mobile">Reg. Month</th>
-        <th class="hide-mobile">Reg. Date</th>
+          <th>Reg. Month</th>
+          <th>Reg. Date</th>
         <th>Status</th>
       </tr></thead>
       <tbody>
@@ -1913,10 +1891,10 @@ try {
           return `<tr onclick="showRecordModal('${i.id}','lto')" style="${s.type==='missing'?'background:rgba(245,158,11,.02)':''}">
             <td class="td-num">${i.item_no||'—'}</td>
             <td class="td-primary">${i.vehicle_name||'—'}</td>
-            <td class="hide-mobile">${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
+                      <td>${i.department?`<span class="badge badge-blue">${i.department}</span>`:'—'}</td>
             <td class="td-mono">${i.plate_number||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${i.registration_month||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${dateCell}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${i.registration_month||'—'}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${dateCell}</td>
             <td>${b}</td>
           </tr>`;
         }).join('')}
@@ -2000,8 +1978,8 @@ try {
     el.innerHTML=`<div class="table-wrap"><table>
       <thead><tr>
         <th>#</th><th>Building Name</th>
-        <th class="hide-mobile">Coverage From</th>
-        <th class="hide-mobile">Coverage To</th>
+          <th>Coverage From</th>
+          <th>Coverage To</th>
         <th>Days Left</th>
         <th>Status</th>
       </tr></thead>
@@ -2016,8 +1994,8 @@ try {
           return `<tr onclick="showRecordModal('${i.id}','building')">
             <td class="td-num">${idx+1}</td>
             <td class="td-primary">${i.building_name||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_from)||'—'}</td>
-            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_to)||'—'}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_from)||'—'}</td>
+                      <td style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_to)||'—'}</td>
             <td class="td-mono" style="color:${daysColor}">${daysStr}</td>
             <td>${b}</td>
           </tr>`;
