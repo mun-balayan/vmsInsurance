@@ -1211,16 +1211,15 @@ td { padding:11px 14px; color:var(--text2); }
 <!-- ════════════════════════════════
      MODAL — XLSX IMPORT
 ════════════════════════════════ -->
-<!-- Update the modal header to be generic -->
 <div class="modal-backdrop" id="modal-import" onclick="closeOverlay(event,'modal-import')">
   <div class="modal" style="max-width:580px">
     <div class="modal-head">
-      <div class="modal-icon bldg" id="import-modal-icon">
+      <div class="modal-icon bldg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
-      <span class="modal-title" id="import-modal-title">Import Data</span>
+      <span class="modal-title">Import Building Insurance</span>
       <button class="modal-close" onclick="closeModal('modal-import')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -1228,23 +1227,6 @@ td { padding:11px 14px; color:var(--text2); }
       </button>
     </div>
     <div class="modal-body">
-      <!-- Record type selector -->
-      <div class="pills-wrap" style="margin-bottom:16px">
-        <div class="pills-label">Select record type</div>
-        <div class="pills-scroll" id="import-type-selector" style="width:100%;gap:8px">
-          <div class="pill active" onclick="setImportType('building')">Building</div>
-          <div class="pill" onclick="setImportType('insurance')">Insurance</div>
-          <div class="pill" onclick="setImportType('lto')">LTO</div>
-        </div>
-      </div>
-
-      <!-- Instructions -->
-      <div id="import-instructions" style="padding:12px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;font-size:11px;color:var(--text3);line-height:1.5">
-        <strong style="color:var(--text2)">Expected columns:</strong>
-        <div id="import-columns-text"></div>
-      </div>
-
-      <!-- Drop zone -->
       <div class="import-drop-zone" id="import-drop-zone">
         <input type="file" id="import-file-input" accept=".xlsx,.xls" onchange="handleImportFile(this.files[0])">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1252,22 +1234,22 @@ td { padding:11px 14px; color:var(--text2); }
           <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/>
         </svg>
         <strong id="import-drop-label">Click or drop XLSX file here</strong>
-        <p id="import-drop-hint"></p>
+        <p>Expected columns: NAME OF BUILDINGS, PERIOD COVERAGE</p>
       </div>
       <div id="import-preview-area" style="display:none">
         <div class="import-preview" id="import-preview"></div>
         <div class="import-options">
           <label class="import-toggle">
             <input type="checkbox" id="import-append" checked>
-            <span id="import-append-text">Append to existing data (keep current records)</span>
+            <span>Append to existing data (keep current records)</span>
           </label>
-          <span class="import-row-count" id="import-row-count"></span>
+          <span class="import-count" id="import-row-count"></span>
         </div>
         <div class="form-actions" style="border-top:none;padding-top:10px;margin-top:0">
           <button class="btn btn-default" onclick="resetImport()">Clear</button>
           <button class="btn btn-rose" onclick="confirmImport()" id="import-confirm-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span id="import-confirm-text">Import</span>
+            Import to Firestore
           </button>
         </div>
       </div>
@@ -2405,219 +2387,119 @@ try {
   window.confirmDelete=confirmDelete;
 
   // ════════════════════════════════
-// XLSX IMPORTER — GENERALIZED
-// ════════════════════════════════
-let _importType = 'building';
-let _importRows = [];
+  // XLSX IMPORTER — BUILDING INSURANCE
+  // ════════════════════════════════
+  let _importRows=[];
 
-const IMPORT_CONFIG = {
-  building: {
-    title: 'Import Building Insurance',
-    icon: 'bldg',
-    columns: ['NAME OF BUILDINGS', 'PERIOD COVERAGE'],
-    columnText: '<strong>NAME OF BUILDINGS</strong>, <strong>PERIOD COVERAGE</strong> (MM/DD/YYYY - MM/DD/YYYY)',
-    parser: (row) => {
-      const name = row['NAME OF BUILDINGS'] || row['Building Name'] || row['name'] || '';
-      const period = row['PERIOD COVERAGE'] || row['Period Coverage'] || row['period'] || '';
-      const parsed = parsePeriodCoverage(String(period));
-      return {
-        building_name: String(name).trim(),
-        coverage_raw: String(period).trim(),
-        coverage_from: parsed.from,
-        coverage_to: parsed.to,
-        remarks: ''
-      };
-    },
-    previewCols: ['#', 'Building Name', 'Coverage From', 'Coverage To'],
-    previewRow: (r, idx) => `<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`,
-    collection: 'building_insurance',
-    confirmText: 'Import to Firestore'
-  },
-  insurance: {
-    title: 'Import Insurance Records',
-    icon: 'ins',
-    columns: ['VEHICLE NAME', 'PLATE NO', 'DEPARTMENT', 'INSURANCE MONTH', 'FROM DATE', 'EXPIRY DATE'],
-    columnText: '<strong>VEHICLE NAME</strong>, <strong>PLATE NO</strong>, <strong>DEPARTMENT</strong>, <strong>INSURANCE MONTH</strong>, <strong>FROM DATE</strong>, <strong>EXPIRY DATE</strong>',
-    parser: (row) => {
-      const fromParsed = row['FROM DATE'] ? safeParse(String(row['FROM DATE']).trim()) : null;
-      const toParsed = row['EXPIRY DATE'] ? safeParse(String(row['EXPIRY DATE']).trim()) : null;
-      return {
-        vehicle_name: String(row['VEHICLE NAME'] || '').trim(),
-        plate_number: String(row['PLATE NO'] || '').trim(),
-        department: String(row['DEPARTMENT'] || '').trim(),
-        insurance_month: String(row['INSURANCE MONTH'] || '').trim(),
-        insurance_date_from: fromParsed ? toInputDate(fromParsed) : '',
-        insurance_date_to: toParsed ? toInputDate(toParsed) : '',
-        remarks: ''
-      };
-    },
-    previewCols: ['#', 'Vehicle', 'Plate', 'Department', 'Month'],
-    previewRow: (r, idx) => `<tr><td>${idx+1}</td><td>${r.vehicle_name}</td><td>${r.plate_number}</td><td>${r.department}</td><td>${r.insurance_month}</td></tr>`,
-    collection: 'vehicle_insurance',
-    confirmText: 'Import Insurance Records'
-  },
-  lto: {
-    title: 'Import LTO Registrations',
-    icon: 'lto',
-    columns: ['VEHICLE NAME', 'PLATE NO', 'DEPARTMENT', 'REGISTRATION MONTH', 'REGISTRATION DATE'],
-    columnText: '<strong>VEHICLE NAME</strong>, <strong>PLATE NO</strong>, <strong>DEPARTMENT</strong>, <strong>REGISTRATION MONTH</strong>, <strong>REGISTRATION DATE</strong>',
-    parser: (row) => {
-      const regParsed = row['REGISTRATION DATE'] ? safeParse(String(row['REGISTRATION DATE']).trim()) : null;
-      return {
-        vehicle_name: String(row['VEHICLE NAME'] || '').trim(),
-        plate_number: String(row['PLATE NO'] || '').trim(),
-        department: String(row['DEPARTMENT'] || '').trim(),
-        registration_month: String(row['REGISTRATION MONTH'] || '').trim(),
-        registration_date: regParsed ? toInputDate(regParsed) : '',
-        remarks: ''
-      };
-    },
-    previewCols: ['#', 'Vehicle', 'Plate', 'Department', 'Reg Date'],
-    previewRow: (r, idx) => `<tr><td>${idx+1}</td><td>${r.vehicle_name}</td><td>${r.plate_number}</td><td>${r.department}</td><td>${fmtDate(r.registration_date)||'—'}</td></tr>`,
-    collection: 'vehicle_insurance',
-    confirmText: 'Import LTO Records'
-  }
-};
-
-function setImportType(type) {
-  _importType = type;
-  _importRows = [];
-  document.querySelectorAll('#import-type-selector .pill').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  
-  const cfg = IMPORT_CONFIG[type];
-  document.getElementById('import-modal-title').textContent = cfg.title;
-  document.getElementById('import-columns-text').innerHTML = cfg.columnText;
-  document.getElementById('import-drop-label').textContent = 'Click or drop XLSX file here';
-  document.getElementById('import-drop-hint').textContent = `File should contain: ${cfg.columns.join(', ')}`;
-  document.getElementById('import-append-text').textContent = type === 'building' 
-    ? 'Append to existing data (keep current records)' 
-    : `Append to existing ${type} records`;
-  document.getElementById('import-confirm-text').textContent = cfg.confirmText;
-  document.getElementById('import-preview-area').style.display = 'none';
-  document.getElementById('import-file-input').value = '';
-  
-  // Update icon
-  const iconEl = document.getElementById('import-modal-icon');
-  iconEl.className = `modal-icon ${cfg.icon}`;
-  if (cfg.icon === 'ins') {
-    iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-  } else if (cfg.icon === 'lto') {
-    iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`;
-  } else {
-    iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-  }
-}
-window.setImportType = setImportType;
-
-function handleImportFile(file) {
-  if (!file) return;
-  document.getElementById('import-drop-label').textContent = file.name;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      const cfg = IMPORT_CONFIG[_importType];
-      _importRows = rows.map(cfg.parser).filter(r => {
-        if (_importType === 'building') return r.building_name;
-        return r.vehicle_name;
-      });
-      showImportPreview();
-    } catch (err) {
-      toast('Error reading XLSX: ' + err.message, 'error');
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-window.handleImportFile = handleImportFile;
-
-function showImportPreview() {
-  const cfg = IMPORT_CONFIG[_importType];
-  const previewRows = _importRows.slice(0, 10);
-  const moreStr = _importRows.length > 10 ? `<tr><td colspan="${cfg.previewCols.length}" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length - 10} more rows</td></tr>` : '';
-  
-  const thead = `<tr>${cfg.previewCols.map(c => `<th>${c}</th>`).join('')}</tr>`;
-  const tbody = previewRows.map((r, idx) => cfg.previewRow(r, idx)).join('') + moreStr;
-  
-  document.getElementById('import-preview').innerHTML = `
-    <div class="import-preview-head">
-      <span>Preview</span>
-      <span style="color:var(--text3)">${_importRows.length} row${_importRows.length !== 1 ? 's' : ''} detected</span>
-    </div>
-    <div class="import-preview-scroll">
-      <table>
-        <thead>${thead}</thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    </div>`;
-  
-  document.getElementById('import-row-count').textContent = `${_importRows.length} record${_importRows.length !== 1 ? 's' : ''}`;
-  document.getElementById('import-preview-area').style.display = 'block';
-}
-
-async function confirmImport() {
-  if (!isOnline) {
-    toast('You are offline. Cannot import.', 'error');
-    return;
-  }
-  if (!_importRows.length) {
-    toast('No data to import.', 'error');
-    return;
-  }
-  
-  const append = document.getElementById('import-append').checked;
-  const btn = document.getElementById('import-confirm-btn');
-  btn.disabled = true;
-  btn.textContent = 'Importing…';
-  
-  try {
-    const cfg = IMPORT_CONFIG[_importType];
-    const col = _importType === 'building' ? bldgCol() : col();
-    
-    // If overwrite: delete all existing docs first
-    if (!append) {
-      const snap = await getDocs(col);
-      const batch = writeBatch(db);
-      snap.docs.forEach(d => batch.delete(d.ref));
-      await batch.commit();
-    }
-    
-    // Batch write new records
-    const chunkSize = 490;
-    for (let c = 0; c < _importRows.length; c += chunkSize) {
-      const chunk = _importRows.slice(c, c + chunkSize);
-      const batch = writeBatch(db);
-      chunk.forEach(row => {
-        const ref = doc(col);
-        batch.set(ref, { ...row, imported_at: new Date().toISOString() });
-      });
-      await batch.commit();
-    }
-    
-    toast(`Imported ${_importRows.length} ${_importType} records!`, 'success');
-    closeModal('modal-import');
+  function openImportModal(){
     resetImport();
-    refreshCurrent();
-  } catch (err) {
-    toast('Import failed: ' + err.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Import';
+    openModal('modal-import');
   }
-}
-window.confirmImport = confirmImport;
+  window.openImportModal=openImportModal;
 
-function resetImport() {
-  _importRows = [];
-  document.getElementById('import-drop-label').textContent = 'Click or drop XLSX file here';
-  document.getElementById('import-preview-area').style.display = 'none';
-  document.getElementById('import-preview').innerHTML = '';
-  const fi = document.getElementById('import-file-input');
-  if (fi) fi.value = '';
-}
-window.resetImport = resetImport;
+  function resetImport(){
+    _importRows=[];
+    document.getElementById('import-drop-label').textContent='Click or drop XLSX file here';
+    document.getElementById('import-preview-area').style.display='none';
+    document.getElementById('import-preview').innerHTML='';
+    const fi=document.getElementById('import-file-input');
+    if(fi) fi.value='';
+  }
+  window.resetImport=resetImport;
+
+  // Parse period string e.g. "10/01/2025 - 10/01/2026" or "05/23/2025 - 5/23/2026"
+  function parsePeriodCoverage(str){
+    if(!str) return {from:'',to:''};
+    const s=String(str).trim();
+    // Try slash-dash: MM/DD/YYYY - MM/DD/YYYY
+    const m=s.match(/(\d{1,2}\/\d{1,2}\/\d{4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+    if(m){
+      const df=new Date(m[1]), dt=new Date(m[2]);
+      if(!isNaN(df)&&!isNaN(dt)) return {from:toInputDate(df),to:toInputDate(dt)};
+    }
+    // Fallback: use splitLegacyInsDate
+    const leg=splitLegacyInsDate(s);
+    return {from:leg.from,to:leg.to};
+  }
+
+  function handleImportFile(file){
+    if(!file) return;
+    document.getElementById('import-drop-label').textContent=file.name;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const data=new Uint8Array(e.target.result);
+        const wb=XLSX.read(data,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        _importRows=rows.map(r=>{
+          const name=r['NAME OF BUILDINGS']||r['Building Name']||r['name']||'';
+          const period=r['PERIOD COVERAGE']||r['Period Coverage']||r['period']||'';
+          const parsed=parsePeriodCoverage(String(period));
+          return {building_name:String(name).trim(),coverage_raw:String(period).trim(),coverage_from:parsed.from,coverage_to:parsed.to,remarks:''};
+        }).filter(r=>r.building_name);
+        showImportPreview();
+      }catch(err){toast('Error reading XLSX: '+err.message,'error');}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  window.handleImportFile=handleImportFile;
+
+  function showImportPreview(){
+    const previewRows=_importRows.slice(0,10);
+    const moreStr=_importRows.length>10?`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
+    document.getElementById('import-preview').innerHTML=`
+      <div class="import-preview-head">
+        <span>Preview</span>
+        <span style="color:var(--text3)">${_importRows.length} row${_importRows.length!==1?'s':''} detected</span>
+      </div>
+      <div class="import-preview-scroll">
+        <table>
+          <thead><tr><th>#</th><th>Building Name</th><th>Coverage From</th><th>Coverage To</th></tr></thead>
+          <tbody>
+            ${previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`).join('')}
+            ${moreStr}
+          </tbody>
+        </table>
+      </div>`;
+    document.getElementById('import-row-count').textContent=`${_importRows.length} record${_importRows.length!==1?'s':''}`;
+    document.getElementById('import-preview-area').style.display='block';
+  }
+
+  async function confirmImport(){
+    if(!isOnline){toast('You are offline. Cannot import.','error');return;}
+    if(!_importRows.length){toast('No data to import.','error');return;}
+    const append=document.getElementById('import-append').checked;
+    const btn=document.getElementById('import-confirm-btn');
+    btn.disabled=true; btn.textContent='Importing…';
+    try{
+      // If overwrite: delete all existing building_insurance docs first
+      if(!append){
+        const snap=await getDocs(bldgCol());
+        const batch=writeBatch(db);
+        snap.docs.forEach(d=>batch.delete(d.ref));
+        await batch.commit();
+      }
+      // Batch write new records (Firestore allows max 500 per batch)
+      const chunkSize=490;
+      for(let c=0;c<_importRows.length;c+=chunkSize){
+        const chunk=_importRows.slice(c,c+chunkSize);
+        const batch=writeBatch(db);
+        chunk.forEach(row=>{
+          const ref=doc(bldgCol());
+          batch.set(ref,{...row,imported_at:new Date().toISOString()});
+        });
+        await batch.commit();
+      }
+      toast(`Imported ${_importRows.length} building records!`,'success');
+      closeModal('modal-import');
+      resetImport();
+    }catch(err){
+      toast('Import failed: '+err.message,'error');
+      btn.disabled=false; btn.textContent='Import to Firestore';
+    }
+  }
+  window.confirmImport=confirmImport;
 
   // Drag-and-drop support on the drop zone
   document.addEventListener('DOMContentLoaded',()=>{
