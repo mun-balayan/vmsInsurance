@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="./logo.png">
 <link rel="apple-touch-icon" href="./logo.png">
 <link rel="shortcut icon" href="./logo.png">
-<title>Vehicle Insurance Monitoring</title>
+<title>VMS Insurance Monitor</title>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -72,6 +72,10 @@
   --sky:    #38BDF8;
   --violet: #8B5CF6;
   --violet-dim: rgba(139,92,246,.12);
+
+  --rose:        #FB7185;
+  --rose-dim:    rgba(251,113,133,.12);
+  --rose-border: rgba(251,113,133,.22);
 
   --text:  #EDF2F7;
   --text2: #8FA5BF;
@@ -270,6 +274,16 @@ body::before {
 }
 .topbar-add-btn:hover { background:var(--cyan); box-shadow:0 0 24px rgba(34,211,238,.3); }
 .topbar-add-btn svg { width:14px; height:14px; }
+.topbar-import-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 13px; border-radius:8px;
+  background:rgba(251,113,133,.12); color:var(--rose);
+  border:1px solid var(--rose-border);
+  font-size:12px; font-weight:600; letter-spacing:.1px;
+  transition:all .15s; flex-shrink:0;
+}
+.topbar-import-btn:hover { background:rgba(251,113,133,.22); box-shadow:0 0 16px rgba(251,113,133,.2); }
+.topbar-import-btn svg { width:14px; height:14px; }
 
 /* ══════════════════════════════════════════
    CONTENT AREA
@@ -308,7 +322,7 @@ body::before {
 /* Dashboard columns */
 .dash-grid {
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:16px;
   flex:1;
   min-height:0;
@@ -336,6 +350,7 @@ body::before {
 .dash-col-icon svg { width:16px; height:16px; }
 .dash-col-icon.ins    { background:var(--cyan-dim);   color:var(--cyan); }
 .dash-col-icon.lto    { background:var(--violet-dim); color:var(--violet); }
+.dash-col-icon.bldg   { background:var(--rose-dim);   color:var(--rose); }
 .dash-col-head-text   { flex:1; }
 .dash-col-title { font-size:13px; font-weight:700; color:var(--text); }
 .dash-col-sub   { font-size:10px; color:var(--text3); margin-top:1px; }
@@ -575,6 +590,7 @@ td { padding:11px 14px; color:var(--text2); }
 .modal-icon svg { width:18px; height:18px; }
 .modal-icon.ins    { background:var(--cyan-dim);   color:var(--cyan); }
 .modal-icon.lto    { background:var(--violet-dim); color:var(--violet); }
+.modal-icon.bldg   { background:var(--rose-dim);   color:var(--rose); }
 .modal-icon.form   { background:var(--emerald-dim); color:var(--emerald); }
 .modal-icon.danger { background:var(--red-dim); color:var(--red); }
 .modal-title { font-size:15px; font-weight:700; color:var(--text); flex:1; letter-spacing:-.2px; }
@@ -605,6 +621,8 @@ td { padding:11px 14px; color:var(--text2); }
 .v-hero-icon-wrap svg { width:22px; height:22px; color:var(--cyan); }
 .v-hero-icon-wrap.lto { background:var(--violet-dim); border-color:rgba(139,92,246,.25); }
 .v-hero-icon-wrap.lto svg { color:var(--violet); }
+.v-hero-icon-wrap.bldg { background:var(--rose-dim); border-color:var(--rose-border); }
+.v-hero-icon-wrap.bldg svg { color:var(--rose); }
 .v-hero-right { flex:1; min-width:0; }
 .v-hero-name { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
 .v-hero-badges { display:flex; flex-wrap:wrap; gap:5px; }
@@ -659,6 +677,60 @@ td { padding:11px 14px; color:var(--text2); }
   border-top:1px solid var(--border);
   grid-column:1/-1;
 }
+
+/* ══════════════════════════════════════════
+   XLSX IMPORTER
+══════════════════════════════════════════ */
+.import-drop-zone {
+  border:2px dashed var(--border); border-radius:var(--rl);
+  padding:32px 20px; text-align:center; cursor:pointer;
+  transition:all .2s; position:relative;
+}
+.import-drop-zone:hover, .import-drop-zone.drag-over {
+  border-color:var(--rose-border); background:var(--rose-dim);
+}
+.import-drop-zone input[type="file"] {
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.import-drop-zone svg { width:32px; height:32px; color:var(--text3); margin-bottom:8px; }
+.import-drop-zone p { font-size:12px; color:var(--text3); margin-top:4px; }
+.import-drop-zone strong { font-size:13px; color:var(--text2); display:block; }
+.import-preview {
+  margin-top:12px; background:var(--bg4); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden;
+}
+.import-preview-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-bottom:1px solid var(--border);
+  font-size:11px; font-weight:700; color:var(--text2);
+}
+.import-preview-scroll { max-height:180px; overflow-y:auto; }
+.import-preview table { width:100%; border-collapse:collapse; font-size:11px; }
+.import-preview th {
+  padding:6px 10px; text-align:left; color:var(--text3);
+  font-size:9.5px; font-weight:700; letter-spacing:.5px;
+  text-transform:uppercase; background:var(--bg5);
+  border-bottom:1px solid var(--border);
+}
+.import-preview td {
+  padding:6px 10px; color:var(--text2); border-bottom:1px solid var(--border2);
+}
+.import-preview tr:last-child td { border-bottom:none; }
+.import-options {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--bg4); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 14px; margin-top:10px;
+  font-size:12px;
+}
+.import-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; }
+.import-toggle input[type="checkbox"] { accent-color:var(--rose); width:15px; height:15px; cursor:pointer; }
+.import-toggle span { color:var(--text2); font-weight:500; }
+.import-count { font-family:var(--mono); font-size:10px; color:var(--text3); }
+.btn-rose {
+  background:var(--rose-dim); border:1px solid var(--rose-border);
+  color:var(--rose);
+}
+.btn-rose:hover { background:rgba(251,113,133,.22); }
 
 /* ══════════════════════════════════════════
    BUTTONS
@@ -798,6 +870,7 @@ td { padding:11px 14px; color:var(--text2); }
    RESPONSIVE
 ══════════════════════════════════════════ */
 @media (max-width: 1200px) {
+  .dash-grid { grid-template-columns:1fr 1fr; }
 }
 @media (max-width: 900px) {
   :root { --sidebar-w:280px; }
@@ -814,7 +887,7 @@ td { padding:11px 14px; color:var(--text2); }
 @media (max-width: 640px) {
   .page { padding:14px; }
   .hide-mobile { display:none !important; }
-  #ins-cards,#lto-cards { display:block; }
+  #ins-cards,#lto-cards,#bldg-cards { display:block; }
   .table-view { display:none; }
   .form-grid { grid-template-columns:1fr; }
   .search-row { flex-direction:column; }
@@ -872,6 +945,15 @@ td { padding:11px 14px; color:var(--text2); }
         <span class="nav-badge" id="badge-lto">—</span>
       </button>
 
+      <button class="nav-item" id="snav-building" onclick="switchPage('building')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span class="nav-label">Building Insurance</span>
+        <span class="nav-badge" id="badge-building">—</span>
+      </button>
+
     </nav>
 
     <div class="sb-footer">
@@ -896,6 +978,15 @@ td { padding:11px 14px; color:var(--text2); }
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
+      </button>
+
+      <button class="topbar-import-btn" id="topbar-import-btn" onclick="openImportModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Import XLSX
       </button>
 
       <span class="topbar-title" id="topbar-title">Dashboard</span>
@@ -1026,6 +1117,45 @@ td { padding:11px 14px; color:var(--text2); }
         <div id="lto-cards"></div>
       </div>
 
+      <!-- ──────── BUILDING INSURANCE ──────── -->
+      <div class="page" id="page-building">
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-head-title">
+              Building Insurance
+              <span class="page-head-count" id="bldg-count"></span>
+            </div>
+            <div class="page-head-sub">GSIS building insurance coverage — Municipality of Balayan</div>
+          </div>
+        </div>
+
+        <div class="search-row">
+          <div class="search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="search-input" type="search" id="bldg-search" placeholder="Search building name, location…" oninput="filterBuilding()">
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active" id="bldg-view-table" onclick="setBldgView('table')" title="Table view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+            <button class="view-btn" id="bldg-view-card" onclick="setBldgView('card')" title="Card view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-view" id="bldg-table-area"></div>
+        <div id="bldg-cards" style="display:none"></div>
+      </div>
+
     </div><!-- /#content -->
   </div><!-- /#main -->
 </div><!-- /#shell -->
@@ -1078,12 +1208,64 @@ td { padding:11px 14px; color:var(--text2); }
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- ════════════════════════════════
+     MODAL — XLSX IMPORT
+════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-import" onclick="closeOverlay(event,'modal-import')">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-head">
+      <div class="modal-icon bldg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <span class="modal-title">Import Building Insurance</span>
+      <button class="modal-close" onclick="closeModal('modal-import')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="import-drop-zone" id="import-drop-zone">
+        <input type="file" id="import-file-input" accept=".xlsx,.xls" onchange="handleImportFile(this.files[0])">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/>
+        </svg>
+        <strong id="import-drop-label">Click or drop XLSX file here</strong>
+        <p>Expected columns: NAME OF BUILDINGS, PERIOD COVERAGE</p>
+      </div>
+      <div id="import-preview-area" style="display:none">
+        <div class="import-preview" id="import-preview"></div>
+        <div class="import-options">
+          <label class="import-toggle">
+            <input type="checkbox" id="import-append" checked>
+            <span>Append to existing data (keep current records)</span>
+          </label>
+          <span class="import-count" id="import-row-count"></span>
+        </div>
+        <div class="form-actions" style="border-top:none;padding-top:10px;margin-top:0">
+          <button class="btn btn-default" onclick="resetImport()">Clear</button>
+          <button class="btn btn-rose" onclick="confirmImport()" id="import-confirm-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import to Firestore
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SheetJS for XLSX parsing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <!-- ════════════════════════════════════════════════════════
      FIREBASE + APP LOGIC  (unchanged from original)
 ════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:     "AIzaSyCmoO3iEpR1R4GzHK2Z21YfCVV9_VRoMJo",
@@ -1107,18 +1289,21 @@ try {
     const txt  = document.getElementById('sb-status-text');
     const ban  = document.getElementById('offline-banner');
     const addBtn = document.getElementById('topbar-add-btn');
+    const impBtn = document.getElementById('topbar-import-btn');
     if(isOnline){
       dot.style.background='var(--emerald)';
       dot.style.boxShadow='0 0 8px rgba(16,185,129,.6)';
       txt.textContent='Connected';
       ban.classList.remove('show');
-      if(addBtn) addBtn.style.display='';
+      if(addBtn) addBtn.style.display=(S.page==='dashboard')?'none':'';
+      if(impBtn) impBtn.style.display='';
     } else {
       dot.style.background='var(--amber)';
       dot.style.boxShadow='0 0 8px rgba(245,158,11,.6)';
       txt.textContent='Offline';
       ban.classList.add('show');
       if(addBtn) addBtn.style.display='none';
+      if(impBtn) impBtn.style.display='none';
     }
   }
   window.addEventListener('online', ()=>{ updateOnline(); toast('Back online!','success'); });
@@ -1130,7 +1315,9 @@ try {
     page:'dashboard', records:[], editId:null, editMode:'insurance',
     insFilter:'All', ltoFilter:'All',
     insSearch:'', ltoSearch:'',
-    insView:'table', ltoView:'table'
+    insView:'table', ltoView:'table',
+    bldgRecords:[], bldgSearch:'', bldgView:'table',
+    editModeBldg:false
   };
 
   const MONTHS=['All','JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE',
@@ -1151,12 +1338,16 @@ try {
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
     document.getElementById(`page-${pg}`).classList.add('active');
     document.getElementById(`snav-${pg}`)?.classList.add('active');
-    const titles={dashboard:'Dashboard',insurance:'Insurance Records',lto:'LTO Registration'};
+    const titles={dashboard:'Dashboard',insurance:'Insurance Records',lto:'LTO Registration',building:'Building Insurance'};
     document.getElementById('topbar-title').textContent=titles[pg]||pg;
+    // Hide add button on dashboard only
+    const addBtn=document.getElementById('topbar-add-btn');
+    if(addBtn) addBtn.style.display=(pg==='dashboard')?'none':'';
     closeSidebar();
     if(pg==='dashboard') loadDashboard();
     else if(pg==='insurance') loadInsurance();
     else if(pg==='lto') loadLTO();
+    else if(pg==='building') loadBuilding();
   }
   window.switchPage=switchPage;
   window.refreshCurrent=()=>switchPage(S.page);
@@ -1165,12 +1356,30 @@ try {
   function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('open'); }
   window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
 
-  // ── Firestore helpers ──
+  // ── Firestore helpers — vehicle_insurance ──
   const col = () => collection(db,'vehicle_insurance');
   async function getAll()          { const s=await getDocs(col()); return s.docs.map(d=>({id:d.id,...d.data()})); }
   async function addRec(data)      { return await addDoc(col(), data); }
   async function updateRec(id,data){ return await updateDoc(doc(db,'vehicle_insurance',id), data); }
   async function deleteRec(id)     { return await deleteDoc(doc(db,'vehicle_insurance',id)); }
+
+  // ── Firestore helpers — building_insurance (real-time) ──
+  const bldgCol = () => collection(db,'building_insurance');
+  async function addBldgRec(data)      { return await addDoc(bldgCol(), data); }
+  async function updateBldgRec(id,data){ return await updateDoc(doc(db,'building_insurance',id), data); }
+  async function deleteBldgRec(id)     { return await deleteDoc(doc(db,'building_insurance',id)); }
+
+  // Real-time listener — stays active for the session
+  let _bldgUnsub=null;
+  function startBldgListener(){
+    if(_bldgUnsub) return; // already listening
+    _bldgUnsub=onSnapshot(bldgCol(), snap=>{
+      S.bldgRecords=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateBldgBadge();
+      if(S.page==='building'){ renderBldgTable(); renderBldgCards(); document.getElementById('bldg-count').textContent=filteredBldg().length; }
+      if(S.page==='dashboard') loadDashboard();
+    }, err=>console.warn('[Firestore] bldg listener:', err));
+  }
 
   // ── Date helpers ──
   function normDateStr(s){ return s.replace(/\b([A-Z]{2,})\b/g,w=>w.charAt(0)+w.slice(1).toLowerCase()); }
@@ -1253,6 +1462,7 @@ try {
   // DASHBOARD
   // ════════════════════════════════
   async function loadDashboard(){
+    startBldgListener(); // ensure real-time listener is active
     const el=document.getElementById('dashboard-inner');
     el.innerHTML=`<div class="loading-state"><div class="spinner"></div><span style="font-size:12px;color:var(--text3)">Loading data…</span></div>`;
     S.records=await getAll();
@@ -1273,10 +1483,14 @@ try {
     const ltoOk   =ltoW.filter(i=>i._ls.type==='ok');
     const ltoUpcoming=ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days).slice(0,5);
 
-    const totalAlerts = insExp.length+insWarn.length+ltoExp.length+ltoWarn.length;
+    // Building insurance — 7-day warn window
+    const bldgW=S.bldgRecords.map(i=>({...i,_bs:insStatus(i.coverage_to,7)}));
+    const bldgExp  =bldgW.filter(i=>i._bs.type==='expired').sort((a,b)=>b._bs.days-a._bs.days);
+    const bldgWarn =bldgW.filter(i=>i._bs.type==='warning').sort((a,b)=>a._bs.days-b._bs.days);
+    const bldgOk   =bldgW.filter(i=>i._bs.type==='ok');
+    const bldgUpcoming=bldgOk.slice().sort((a,b)=>a._bs.days-b._bs.days).slice(0,5);
 
     el.innerHTML=`
-      <!-- Date -->
       <div class="dash-date-strip">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -1284,7 +1498,6 @@ try {
         ${todayStr}
       </div>
 
-      <!-- Two-column grid -->
       <div class="dash-grid">
         <!-- INSURANCE COL -->
         <div class="dash-col">
@@ -1351,53 +1564,94 @@ try {
             <div id="lto-upcoming-slot"></div>
           </div>
         </div>
+
+        <!-- BUILDING COL -->
+        <div class="dash-col">
+          <div class="dash-col-head">
+            <div class="dash-col-icon bldg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="dash-col-head-text">
+              <div class="dash-col-title">Building Insurance</div>
+              <div class="dash-col-sub">GSIS building coverage</div>
+            </div>
+            <button class="dash-col-btn" onclick="switchPage('building')">View all →</button>
+          </div>
+          <div class="dash-col-body">
+            <div class="dash-stats-grid" id="bldg-stats-row">
+              <div class="dash-stat-card" id="bldg-card-expired" onclick="toggleStatList('bldg','expired')">
+                <div class="dash-stat-num red">${bldgExp.length}</div>
+                <div class="dash-stat-lbl">Expired</div>
+              </div>
+              <div class="dash-stat-card" id="bldg-card-warning" onclick="toggleStatList('bldg','warning')">
+                <div class="dash-stat-num amber">${bldgWarn.length}</div>
+                <div class="dash-stat-lbl">Due ≤7d</div>
+              </div>
+              <div class="dash-stat-card" id="bldg-card-ok" onclick="toggleStatList('bldg','ok')">
+                <div class="dash-stat-num green">${bldgOk.length}</div>
+                <div class="dash-stat-lbl">Active</div>
+              </div>
+              <div class="stat-listbox" id="bldg-listbox" style="grid-column:1/-1"></div>
+            </div>
+            <div id="bldg-attention-slot"></div>
+            <div id="bldg-upcoming-slot"></div>
+          </div>
+        </div>
       </div>`;
 
-    // Build alert sections
+    // Build alert sections — Insurance
     let insAttentionHtml='';
     if(insExp.length){
-      insAttentionHtml+=`<div class="alert-section-label red">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Expired (${insExp.length})</div>`;
+      insAttentionHtml+=`<div class="alert-section-label red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Expired (${insExp.length})</div>`;
       insAttentionHtml+=insExp.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
     }
     if(insWarn.length){
-      insAttentionHtml+=`<div class="alert-section-label amber">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-        Due Soon (${insWarn.length})</div>`;
+      insAttentionHtml+=`<div class="alert-section-label amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Due Soon (${insWarn.length})</div>`;
       insAttentionHtml+=insWarn.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('');
     }
-    if(!insExp.length&&!insWarn.length){
-      insAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry insurance</p></div>`;
-    }
+    if(!insExp.length&&!insWarn.length) insAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry insurance</p></div>`;
 
+    // LTO alerts
     let ltoAttentionHtml='';
     if(ltoExp.length){
-      ltoAttentionHtml+=`<div class="alert-section-label red">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Expired (${ltoExp.length})</div>`;
+      ltoAttentionHtml+=`<div class="alert-section-label red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Expired (${ltoExp.length})</div>`;
       ltoAttentionHtml+=ltoExp.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
     }
     if(ltoWarn.length){
-      ltoAttentionHtml+=`<div class="alert-section-label amber">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-        Due Soon (${ltoWarn.length})</div>`;
+      ltoAttentionHtml+=`<div class="alert-section-label amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Due Soon (${ltoWarn.length})</div>`;
       ltoAttentionHtml+=ltoWarn.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('');
     }
-    if(!ltoExp.length&&!ltoWarn.length){
-      ltoAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry registrations</p></div>`;
-    }
+    if(!ltoExp.length&&!ltoWarn.length) ltoAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><p>No expired or near-expiry registrations</p></div>`;
 
-    const upcomingLabel = `<div class="alert-section-label muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Upcoming Renewals</div>`;
-    const insUpcomingHtml = insUpcoming.length ? upcomingLabel+insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join('') : '';
-    const ltoUpcomingHtml = ltoUpcoming.length ? upcomingLabel+ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join('') : '';
+    // Building alerts
+    let bldgAttentionHtml='';
+    if(bldgExp.length){
+      bldgAttentionHtml+=`<div class="alert-section-label red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Expired (${bldgExp.length})</div>`;
+      bldgAttentionHtml+=bldgExp.map(i=>bldgAlertRow(i,i._bs)).join('');
+    }
+    if(bldgWarn.length){
+      bldgAttentionHtml+=`<div class="alert-section-label amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Due ≤7 days (${bldgWarn.length})</div>`;
+      bldgAttentionHtml+=bldgWarn.map(i=>bldgAlertRow(i,i._bs)).join('');
+    }
+    if(!bldgExp.length&&!bldgWarn.length) bldgAttentionHtml=`<div class="dash-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><p>All building coverage is current</p></div>`;
+
+    const upLbl=`<div class="alert-section-label muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Upcoming Renewals</div>`;
+    const insUpHtml=insUpcoming.length?upLbl+insUpcoming.map(i=>alertRow(i,i._is,`${insDateRangeDisplay(i)} · Expires: ${endDateDisplay(getInsExpiry(i))||'—'}`,`showRecordModal('${i.id}','insurance')`)).join(''):'';
+    const ltoUpHtml=ltoUpcoming.length?upLbl+ltoUpcoming.map(i=>alertRow(i,i._ls,`Reg. Date: ${fmtDate(i.registration_date)}`,`showRecordModal('${i.id}','lto')`)).join(''):'';
+    const bldgUpHtml=bldgUpcoming.length?upLbl+bldgUpcoming.map(i=>bldgAlertRow(i,i._bs)).join(''):'';
 
     document.getElementById('ins-attention-slot').innerHTML=insAttentionHtml;
-    document.getElementById('ins-upcoming-slot').innerHTML=insUpcomingHtml;
+    document.getElementById('ins-upcoming-slot').innerHTML=insUpHtml;
     document.getElementById('lto-attention-slot').innerHTML=ltoAttentionHtml;
-    document.getElementById('lto-upcoming-slot').innerHTML=ltoUpcomingHtml;
+    document.getElementById('lto-upcoming-slot').innerHTML=ltoUpHtml;
+    document.getElementById('bldg-attention-slot').innerHTML=bldgAttentionHtml;
+    document.getElementById('bldg-upcoming-slot').innerHTML=bldgUpHtml;
 
-    window._dashData={ insExp, insWarn, insOk:insOk.slice().sort((a,b)=>a._is.days-b._is.days), ltoExp, ltoWarn, ltoOk:ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days) };
+    window._dashData={
+      insExp,insWarn,insOk:insOk.slice().sort((a,b)=>a._is.days-b._is.days),
+      ltoExp,ltoWarn,ltoOk:ltoOk.slice().sort((a,b)=>a._ls.days-b._ls.days),
+      bldgExp,bldgWarn,bldgOk:bldgOk.slice().sort((a,b)=>a._bs.days-b._bs.days)
+    };
   }
 
   // ── Stat listbox toggle ──
@@ -1406,8 +1660,11 @@ try {
     const cards={expired:`${col}-card-expired`,warning:`${col}-card-warning`,ok:`${col}-card-ok`};
     const colorMap={expired:'active-red',warning:'active-amber',ok:'active-green'};
     const data=window._dashData||{};
-    const isMode=col==='ins';
-    const lists=isMode?{expired:data.insExp||[],warning:data.insWarn||[],ok:data.insOk||[]}:{expired:data.ltoExp||[],warning:data.ltoWarn||[],ok:data.ltoOk||[]};
+    const isBldg=col==='bldg', isMode=col==='ins';
+    let lists;
+    if(isBldg) lists={expired:data.bldgExp||[],warning:data.bldgWarn||[],ok:data.bldgOk||[]};
+    else if(isMode) lists={expired:data.insExp||[],warning:data.insWarn||[],ok:data.insOk||[]};
+    else lists={expired:data.ltoExp||[],warning:data.ltoWarn||[],ok:data.ltoOk||[]};
     const labels={expired:'Expired',warning:'Due Soon',ok:'Active'};
 
     const alreadyOpen=lb.classList.contains('open')&&lb.dataset.type===type;
@@ -1424,14 +1681,25 @@ try {
 
     const dayColors={expired:'var(--red)',warning:'var(--amber)',ok:'var(--emerald)'};
     const rows=items.map(i=>{
-      const s=isMode?i._is:i._ls;
+      const s=isBldg?i._bs:isMode?i._is:i._ls;
       const daysLabel=s.type==='expired'?`Expired ${s.days}d ago`:s.days===0?'Due Today':`Due in ${s.days}d`;
-      const meta=isMode?(i.insurance_date_from||i.insurance_date_to?`${fmtDate(i.insurance_date_from)||'?'} → ${fmtDate(i.insurance_date_to)||'?'}`:(i.insurance_date||i.insurance_month||'')):(`Reg: ${fmtDate(i.registration_date)}`);
-      const recMode=isMode?'insurance':'lto';
+      let meta,recMode;
+      if(isBldg){
+        meta=`${fmtDate(i.coverage_from)||'?'} → ${fmtDate(i.coverage_to)||'?'}`;
+        recMode='building';
+      } else if(isMode){
+        meta=i.insurance_date_from||i.insurance_date_to?`${fmtDate(i.insurance_date_from)||'?'} → ${fmtDate(i.insurance_date_to)||'?'}`:(i.insurance_date||i.insurance_month||'');
+        recMode='insurance';
+      } else {
+        meta=`Reg: ${fmtDate(i.registration_date)}`;
+        recMode='lto';
+      }
+      const nameStr=isBldg?(i.building_name||'-'):(i.vehicle_name||'-');
+      const subStr=isBldg?'':`<span>${i.plate_number||''}</span>`;
       return `<div class="stat-list-row" onclick="showRecordModal('${i.id}','${recMode}')">
         <div class="stat-list-left">
-          <div class="stat-list-name">${i.vehicle_name||'-'} <span>${i.plate_number||''}</span></div>
-          <div class="stat-list-meta">${i.department||''} · ${meta}</div>
+          <div class="stat-list-name">${nameStr} ${subStr}</div>
+          <div class="stat-list-meta">${isBldg?'':(i.department||'')+' · '}${meta}</div>
         </div>
         <div class="stat-list-days" style="color:${dayColors[type]}">${daysLabel}</div>
       </div>`;
@@ -1450,6 +1718,11 @@ try {
     document.getElementById('badge-insurance').textContent=S.records.length;
     const ltoCount=S.records.filter(i=>i.registration_date||i.registration_month).length;
     document.getElementById('badge-lto').textContent=ltoCount;
+    updateBldgBadge();
+  }
+  function updateBldgBadge(){
+    const el=document.getElementById('badge-building');
+    if(el) el.textContent=S.bldgRecords.length;
   }
 
   // ════════════════════════════════
@@ -1474,6 +1747,16 @@ try {
     if(v==='card') renderLTOCards(); else renderLTOTable();
   }
   window.setLtoView=setLtoView;
+
+  function setBldgView(v){
+    S.bldgView=v;
+    document.getElementById('bldg-view-table').classList.toggle('active',v==='table');
+    document.getElementById('bldg-view-card').classList.toggle('active',v==='card');
+    document.getElementById('bldg-table-area').style.display=v==='table'?'block':'none';
+    document.getElementById('bldg-cards').style.display=v==='card'?'block':'none';
+    if(v==='card') renderBldgCards(); else renderBldgTable();
+  }
+  window.setBldgView=setBldgView;
 
   // ════════════════════════════════
   // INSURANCE PAGE
@@ -1662,21 +1945,164 @@ try {
   }
 
   // ════════════════════════════════
+  // BUILDING INSURANCE PAGE
+  // ════════════════════════════════
+
+  // Alert row for building (no plate/dept)
+  function bldgAlertRow(i, statusObj){
+    const s=statusObj;
+    const colorCls=s.type==='expired'?'red':s.type==='warning'?'amber':'green';
+    const daysLabel=s.type==='expired'?`Expired ${s.days}d ago`:s.days===0?'Due Today':`Due in ${s.days}d`;
+    const period=`${fmtDate(i.coverage_from)||'?'} → ${fmtDate(i.coverage_to)||'?'}`;
+    return `<div class="alert-row ${colorCls}" onclick="showRecordModal('${i.id}','building')">
+      <div class="alert-dot ${colorCls}"></div>
+      <div class="alert-info">
+        <div class="alert-name">${i.building_name||'-'}</div>
+        <div class="alert-meta">${period}</div>
+      </div>
+      <div class="alert-days ${colorCls}">${daysLabel}</div>
+    </div>`;
+  }
+
+  function loadBuilding(){
+    startBldgListener();
+    updateBldgBadge();
+    const count=filteredBldg().length;
+    document.getElementById('bldg-count').textContent=count;
+    renderBldgTable();
+    renderBldgCards();
+  }
+
+  function filteredBldg(){
+    const q=S.bldgSearch.toLowerCase();
+    let list=S.bldgRecords;
+    if(q) list=list.filter(i=>[i.building_name,i.coverage_from,i.coverage_to,i.remarks].join(' ').toLowerCase().includes(q));
+    return list;
+  }
+
+  function filterBuilding(){
+    S.bldgSearch=(document.getElementById('bldg-search').value||'').toLowerCase();
+    document.getElementById('bldg-count').textContent=filteredBldg().length;
+    renderBldgTable(); renderBldgCards();
+  }
+  window.filterBuilding=filterBuilding;
+
+  function renderBldgTable(){
+    const list=filteredBldg();
+    const el=document.getElementById('bldg-table-area');
+    if(!list.length){
+      el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><p>No building insurance records found. Import an XLSX to get started.</p></div>`;
+      return;
+    }
+    const svgCheck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:9px;height:9px"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const svgX=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:9px;height:9px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const svgWarn=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:9px;height:9px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
+    el.innerHTML=`<div class="table-wrap"><table>
+      <thead><tr>
+        <th>#</th><th>Building Name</th>
+        <th class="hide-mobile">Coverage From</th>
+        <th class="hide-mobile">Coverage To</th>
+        <th>Days Left</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+        ${list.map((i,idx)=>{
+          const s=insStatus(i.coverage_to,7);
+          const b=s.type==='expired'?`<span class="badge badge-red">${svgX} Expired</span>`
+                 :s.type==='warning'?`<span class="badge badge-amber">${svgWarn} Due Soon</span>`
+                 :`<span class="badge badge-green">${svgCheck} Active</span>`;
+          const daysStr=s.days!==null?(s.type==='expired'?`-${s.days}d`:`+${s.days}d`):'—';
+          const daysColor=s.type==='expired'?'var(--red)':s.type==='warning'?'var(--amber)':'var(--emerald)';
+          return `<tr onclick="showRecordModal('${i.id}','building')">
+            <td class="td-num">${idx+1}</td>
+            <td class="td-primary">${i.building_name||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_from)||'—'}</td>
+            <td class="hide-mobile" style="color:var(--text3);font-size:11.5px">${fmtDate(i.coverage_to)||'—'}</td>
+            <td class="td-mono" style="color:${daysColor}">${daysStr}</td>
+            <td>${b}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table></div>`;
+  }
+
+  function renderBldgCards(){
+    const list=filteredBldg();
+    const svgHouse=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
+    document.getElementById('bldg-cards').innerHTML=list.map((i,idx)=>{
+      const s=insStatus(i.coverage_to,7);
+      const bText=s.type==='expired'?'Expired':s.type==='warning'?'Due ≤7d':'Active';
+      const bCls=s.type==='expired'?'badge-red':s.type==='warning'?'badge-amber':'badge-green';
+      return `<div class="m-card" style="animation-delay:${Math.min(idx,10)*.03}s" onclick="showRecordModal('${i.id}','building')">
+        <div class="m-card-top">
+          <div class="m-card-name">${i.building_name||'—'}</div>
+          <span class="badge ${bCls}">${bText}</span>
+        </div>
+        <div class="m-card-detail">${svgHouse} ${fmtDate(i.coverage_from)||'?'} → ${fmtDate(i.coverage_to)||'?'}</div>
+        ${i.remarks?`<div class="m-card-detail" style="margin-top:4px;color:var(--text3)">${i.remarks}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  // ════════════════════════════════
   // RECORD DETAIL MODAL
   // ════════════════════════════════
   function showRecordModal(id, mode){
-    const i=S.records.find(x=>x.id===id); if(!i) return;
-    document.getElementById('rec-title').textContent=i.vehicle_name||'Record';
+    let i;
+    if(mode==='building'){
+      i=S.bldgRecords.find(x=>x.id===id);
+    } else {
+      i=S.records.find(x=>x.id===id);
+    }
+    if(!i) return;
 
-    // Update modal icon
     const iconEl=document.getElementById('rec-modal-icon');
     if(mode==='lto'){
       iconEl.className='modal-icon lto';
       iconEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>`;
+    } else if(mode==='building'){
+      iconEl.className='modal-icon bldg';
+      iconEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
     } else {
       iconEl.className='modal-icon ins';
       iconEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
     }
+
+    if(mode==='building'){
+      document.getElementById('rec-title').textContent=i.building_name||'Building Record';
+      const st=insStatus(i.coverage_to,7);
+      const sb=statusBadge(st.type,st.days);
+      document.getElementById('rec-body').innerHTML=`
+        <div class="v-hero">
+          <div class="v-hero-icon-wrap bldg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="v-hero-right">
+            <div class="v-hero-name">${i.building_name||'—'}</div>
+            <div class="v-hero-badges">${sb}</div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Coverage Period</div>
+          ${dr('Coverage From',fmtDate(i.coverage_from))}
+          ${dr('Coverage To',fmtDate(i.coverage_to))}
+          ${dr('Original Period',i.coverage_raw)}
+          ${dr('Remarks',i.remarks)}
+        </div>
+        <div class="form-actions" style="padding-top:12px;border-top:1px solid var(--border);margin-top:8px">
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteBldg('${id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <button class="btn btn-default btn-sm" onclick="openEditBldgModal('${id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Record
+          </button>
+        </div>`;
+      openModal('modal-record');
+      return;
+    }
+
+    document.getElementById('rec-title').textContent=i.vehicle_name||'Record';
 
     if(mode==='insurance'){
       const st=insStatus(getInsExpiry(i),14);
@@ -1765,6 +2191,14 @@ try {
   // ════════════════════════════════
   function openAddModal(){
     S.editId=null;
+    if(S.page==='building'){
+      S.editModeBldg=true;
+      document.getElementById('form-title').textContent='Add Building Insurance';
+      document.getElementById('form-body').innerHTML=bldgForm();
+      openModal('modal-form');
+      return;
+    }
+    S.editModeBldg=false;
     const mode=S.page==='lto'?'lto':'insurance';
     S.editMode=mode;
     document.getElementById('form-title').textContent=mode==='lto'?'Add LTO Registration':'Add Insurance Record';
@@ -1772,6 +2206,66 @@ try {
     openModal('modal-form');
   }
   window.openAddModal=openAddModal;
+
+  function openEditBldgModal(id){
+    S.editId=id; S.editModeBldg=true;
+    closeModal('modal-record');
+    const i=S.bldgRecords.find(x=>x.id===id)||{};
+    document.getElementById('form-title').textContent='Edit Building Insurance';
+    document.getElementById('form-body').innerHTML=bldgForm(i);
+    openModal('modal-form');
+  }
+  window.openEditBldgModal=openEditBldgModal;
+
+  function bldgForm(i={}){
+    return `<div class="form-grid" id="rform">
+      ${fi('building_name','Building Name',i)}
+      <div class="form-group form-full">
+        <label>Coverage Period (From → To)</label>
+        <div class="form-date-row">
+          <input class="form-input" type="date" name="coverage_from" value="${ea(i.coverage_from||'')}">
+          <div class="form-date-arrow">→</div>
+          <input class="form-input" type="date" name="coverage_to" value="${ea(i.coverage_to||'')}">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-default" onclick="closeModal('modal-form')">Cancel</button>
+        <button class="btn btn-rose" onclick="saveBldgRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Building Record
+        </button>
+      </div>
+    </div>`;
+  }
+
+  async function saveBldgRecord(){
+    if(!isOnline){toast('You are offline. Cannot save changes.','error');return;}
+    const data={};
+    document.querySelectorAll('#rform [name]').forEach(el=>data[el.name]=el.value||null);
+    try{
+      if(S.editId){
+        await updateBldgRec(S.editId,data);
+        toast('Building record updated!','success');
+      } else {
+        await addBldgRec(data);
+        toast('Building record added!','success');
+      }
+      S.editId=null; S.editModeBldg=false;
+      closeModal('modal-form');
+    }catch(e){toast('Error: '+e.message,'error');}
+  }
+  window.saveBldgRecord=saveBldgRecord;
+
+  async function confirmDeleteBldg(id){
+    if(!isOnline){toast('You are offline. Cannot delete records.','error');return;}
+    if(!confirm('Delete this building record? This cannot be undone.'))return;
+    try{
+      await deleteBldgRec(id);
+      toast('Building record deleted.','success');
+      closeModal('modal-record');
+    }catch(e){toast('Error: '+e.message,'error');}
+  }
+  window.confirmDeleteBldg=confirmDeleteBldg;
 
   function openEditModal(id,mode){
     S.editId=id; S.editMode=mode;
@@ -1892,6 +2386,138 @@ try {
   }
   window.confirmDelete=confirmDelete;
 
+  // ════════════════════════════════
+  // XLSX IMPORTER — BUILDING INSURANCE
+  // ════════════════════════════════
+  let _importRows=[];
+
+  function openImportModal(){
+    resetImport();
+    openModal('modal-import');
+  }
+  window.openImportModal=openImportModal;
+
+  function resetImport(){
+    _importRows=[];
+    document.getElementById('import-drop-label').textContent='Click or drop XLSX file here';
+    document.getElementById('import-preview-area').style.display='none';
+    document.getElementById('import-preview').innerHTML='';
+    const fi=document.getElementById('import-file-input');
+    if(fi) fi.value='';
+  }
+  window.resetImport=resetImport;
+
+  // Parse period string e.g. "10/01/2025 - 10/01/2026" or "05/23/2025 - 5/23/2026"
+  function parsePeriodCoverage(str){
+    if(!str) return {from:'',to:''};
+    const s=String(str).trim();
+    // Try slash-dash: MM/DD/YYYY - MM/DD/YYYY
+    const m=s.match(/(\d{1,2}\/\d{1,2}\/\d{4})\s*[-–]\s*(\d{1,2}\/\d{1,2}\/\d{4})/);
+    if(m){
+      const df=new Date(m[1]), dt=new Date(m[2]);
+      if(!isNaN(df)&&!isNaN(dt)) return {from:toInputDate(df),to:toInputDate(dt)};
+    }
+    // Fallback: use splitLegacyInsDate
+    const leg=splitLegacyInsDate(s);
+    return {from:leg.from,to:leg.to};
+  }
+
+  function handleImportFile(file){
+    if(!file) return;
+    document.getElementById('import-drop-label').textContent=file.name;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const data=new Uint8Array(e.target.result);
+        const wb=XLSX.read(data,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        _importRows=rows.map(r=>{
+          const name=r['NAME OF BUILDINGS']||r['Building Name']||r['name']||'';
+          const period=r['PERIOD COVERAGE']||r['Period Coverage']||r['period']||'';
+          const parsed=parsePeriodCoverage(String(period));
+          return {building_name:String(name).trim(),coverage_raw:String(period).trim(),coverage_from:parsed.from,coverage_to:parsed.to,remarks:''};
+        }).filter(r=>r.building_name);
+        showImportPreview();
+      }catch(err){toast('Error reading XLSX: '+err.message,'error');}
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  window.handleImportFile=handleImportFile;
+
+  function showImportPreview(){
+    const previewRows=_importRows.slice(0,10);
+    const moreStr=_importRows.length>10?`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:8px 10px">…and ${_importRows.length-10} more rows</td></tr>`:'';
+    document.getElementById('import-preview').innerHTML=`
+      <div class="import-preview-head">
+        <span>Preview</span>
+        <span style="color:var(--text3)">${_importRows.length} row${_importRows.length!==1?'s':''} detected</span>
+      </div>
+      <div class="import-preview-scroll">
+        <table>
+          <thead><tr><th>#</th><th>Building Name</th><th>Coverage From</th><th>Coverage To</th></tr></thead>
+          <tbody>
+            ${previewRows.map((r,idx)=>`<tr><td>${idx+1}</td><td>${r.building_name}</td><td>${fmtDate(r.coverage_from)||r.coverage_raw||'—'}</td><td>${fmtDate(r.coverage_to)||'—'}</td></tr>`).join('')}
+            ${moreStr}
+          </tbody>
+        </table>
+      </div>`;
+    document.getElementById('import-row-count').textContent=`${_importRows.length} record${_importRows.length!==1?'s':''}`;
+    document.getElementById('import-preview-area').style.display='block';
+  }
+
+  async function confirmImport(){
+    if(!isOnline){toast('You are offline. Cannot import.','error');return;}
+    if(!_importRows.length){toast('No data to import.','error');return;}
+    const append=document.getElementById('import-append').checked;
+    const btn=document.getElementById('import-confirm-btn');
+    btn.disabled=true; btn.textContent='Importing…';
+    try{
+      // If overwrite: delete all existing building_insurance docs first
+      if(!append){
+        const snap=await getDocs(bldgCol());
+        const batch=writeBatch(db);
+        snap.docs.forEach(d=>batch.delete(d.ref));
+        await batch.commit();
+      }
+      // Batch write new records (Firestore allows max 500 per batch)
+      const chunkSize=490;
+      for(let c=0;c<_importRows.length;c+=chunkSize){
+        const chunk=_importRows.slice(c,c+chunkSize);
+        const batch=writeBatch(db);
+        chunk.forEach(row=>{
+          const ref=doc(bldgCol());
+          batch.set(ref,{...row,imported_at:new Date().toISOString()});
+        });
+        await batch.commit();
+      }
+      toast(`Imported ${_importRows.length} building records!`,'success');
+      closeModal('modal-import');
+      resetImport();
+    }catch(err){
+      toast('Import failed: '+err.message,'error');
+      btn.disabled=false; btn.textContent='Import to Firestore';
+    }
+  }
+  window.confirmImport=confirmImport;
+
+  // Drag-and-drop support on the drop zone
+  document.addEventListener('DOMContentLoaded',()=>{
+    const dz=document.getElementById('import-drop-zone');
+    if(dz){
+      dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+      dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+      dz.addEventListener('drop',e=>{
+        e.preventDefault(); dz.classList.remove('drag-over');
+        const f=e.dataTransfer.files[0];
+        if(f) handleImportFile(f);
+      });
+    }
+  });
+
+  // Start real-time listener immediately on app load
+  startBldgListener();
+
   // Start
   loadDashboard();
 
@@ -1948,7 +2574,7 @@ window.toast=toast;
 /* Close modals with Escape key */
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-    ['modal-record','modal-form'].forEach(id=>{
+    ['modal-record','modal-form','modal-import'].forEach(id=>{
       const m=document.getElementById(id);
       if(m&&m.classList.contains('open'))closeModal(id);
     });
