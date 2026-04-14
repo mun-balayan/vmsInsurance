@@ -1,65 +1,74 @@
 // ═══════════════════════════════════════════════════════════
-//  VMS Insurance Monitor — Service Worker
+//  VMS Insurance Monitor — Service Worker  (sw.js)
 //  GitHub Pages: mun-balayan.github.io/vmsInsurance
 //
-//  Auto-update strategy:
-//  • The cache name embeds a BUILD_TIME timestamp.
-//    Every time you push to GitHub, this file changes →
-//    browser detects a new SW → installs & activates
-//    automatically → posts a message to every open tab
-//    → tabs reload once to pick up fresh assets.
-//  • No manual version bump needed.
+//  Update strategy:
+//  ┌─────────────────────────────────────────────────────┐
+//  │  On every page open the app calls reg.update().     │
+//  │  The browser re-fetches this file from the server   │
+//  │  and does a byte-diff. If anything changed (even    │
+//  │  just the CACHE_VERSION below), a new SW installs   │
+//  │  immediately via skipWaiting() and posts            │
+//  │  SW_UPDATED to all open tabs so they reload once.   │
+//  │                                                     │
+//  │  → Bump CACHE_VERSION on every deploy. Or use the   │
+//  │    GitHub Actions snippet in the README to auto-    │
+//  │    stamp it with the commit SHA.                    │
+//  └─────────────────────────────────────────────────────┘
+//
+//  Local / file:// testing:
+//  Service Workers cannot register on file:// URLs.
+//  The app gracefully continues without the SW — Firebase
+//  and all features work normally without it.
 // ═══════════════════════════════════════════════════════════
 
-const BUILD_TIME = new Date().toISOString().slice(0, 16); // e.g. "2026-03-19T15:30"
-const CACHE      = `vms-insurance-${BUILD_TIME}`;
-const BASE       = '/vmsInsurance';
+// ── Bump this on every deploy to trigger a cache refresh ──
+const CACHE_VERSION = 'v2026-04-14';          // ← change per deploy
+const CACHE         = `vms-insurance-${CACHE_VERSION}`;
+const BASE          = '/vmsInsurance';
 
 const PRECACHE = [
   `${BASE}/`,
   `${BASE}/index.html`,
+  `${BASE}/styles.css`,
+  `${BASE}/helpers.js`,
+  `${BASE}/app.js`,
   `${BASE}/manifest.json`,
   `${BASE}/logo.png`,
 ];
 
 // ── INSTALL ────────────────────────────────────────────────
-// Pre-cache app shell. skipWaiting() so the new SW activates
-// immediately instead of waiting for all tabs to close.
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
       .then(c => c.addAll(PRECACHE.map(u => new Request(u, { cache: 'reload' }))))
       .catch(err => console.warn('[SW] Pre-cache partial failure:', err))
   );
-  self.skipWaiting(); // activate immediately on install
+  // Activate immediately — don't wait for old tabs to close.
+  self.skipWaiting();
 });
 
 // ── ACTIVATE ───────────────────────────────────────────────
-// 1. Delete every cache that isn't this build's cache.
-// 2. Claim all open clients immediately.
-// 3. Post 'SW_UPDATED' to every tab so they reload once.
 self.addEventListener('activate', e => {
   e.waitUntil(
+    // 1. Delete all old caches from previous versions.
     caches.keys()
       .then(keys => Promise.all(
         keys
           .filter(k => k.startsWith('vms-insurance-') && k !== CACHE)
-          .map(k => caches.delete(k))
+          .map(k  => caches.delete(k))
       ))
+      // 2. Take control of all open tabs immediately.
+      //    This triggers 'controllerchange' on the page — the reliable
+      //    reload signal (replaces the old postMessage approach).
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: 'SW_UPDATED', cache: CACHE });
-        });
-      })
   );
 });
 
 // ── FETCH ──────────────────────────────────────────────────
-// Bypass Firebase / Google APIs / fonts completely.
-// For everything in our scope: network-first, cache on success,
-// fall back to cache when offline.
+// • Bypass all Firebase / Google CDN requests entirely.
+// • For our own files: network-first → cache on success
+//   → fallback to cached version when offline.
 const BYPASS_HOSTS = [
   'firebaseapp.com',
   'googleapis.com',
@@ -72,21 +81,23 @@ const BYPASS_HOSTS = [
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Let Firebase & CDN calls go straight to the network
+  // Let Firebase & external CDN calls go straight to the network.
   if (BYPASS_HOSTS.some(h => url.hostname.includes(h))) return;
 
-  // Only intercept our own scope
+  // Only intercept requests within our app scope.
   if (!url.pathname.startsWith(BASE)) return;
 
   e.respondWith(
     fetch(e.request)
       .then(res => {
+        // Cache a fresh copy on every successful network response.
         if (res.ok) {
           caches.open(CACHE).then(c => c.put(e.request, res.clone()));
         }
         return res;
       })
       .catch(() =>
+        // Offline: serve from cache, fall back to index.html shell.
         caches.match(e.request)
           .then(cached => cached || caches.match(`${BASE}/index.html`))
       )
