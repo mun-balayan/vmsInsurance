@@ -59,9 +59,14 @@ self.addEventListener('activate', e => {
           .map(k  => caches.delete(k))
       ))
       // 2. Take control of all open tabs immediately.
-      //    This triggers 'controllerchange' on the page — the reliable
-      //    reload signal (replaces the old postMessage approach).
+      //    clients.claim() triggers 'controllerchange' on every controlled page.
       .then(() => self.clients.claim())
+      // 3. Belt-and-suspenders: also explicitly message every open window tab
+      //    so the page can reload even if controllerchange was already consumed.
+      .then(() =>
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+          .then(clients => clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' })))
+      )
   );
 });
 

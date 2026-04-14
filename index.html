@@ -42,14 +42,18 @@
 
         // 'controllerchange' fires when clients.claim() in the new SW's
         // activate event gives the new SW control of this tab.
-        // This is the reliable trigger to reload and pick up fresh assets.
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('sw_reloaded')) {
-            sessionStorage.setItem('sw_reloaded', '1');
-            window.location.reload();
-          } else {
-            sessionStorage.removeItem('sw_reloaded');
-          }
+        // In-memory flag (not sessionStorage) so it resets on every fresh
+        // page load — sessionStorage persists in the tab and would skip
+        // the reload if a second deploy happened in the same tab session.
+        let _swUpdating = false;
+        function _doSwReload() {
+          if (!_swUpdating) { _swUpdating = true; window.location.reload(); }
+        }
+        navigator.serviceWorker.addEventListener('controllerchange', _doSwReload);
+        // Belt-and-suspenders: also listen for explicit SW_UPDATED message
+        // sent by the SW's activate handler via clients.postMessage().
+        navigator.serviceWorker.addEventListener('message', e => {
+          if (e.data?.type === 'SW_UPDATED') _doSwReload();
         });
       });
     }
